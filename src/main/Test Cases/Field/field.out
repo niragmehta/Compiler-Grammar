@@ -1,0 +1,20 @@
+Program(
+	InitedFieldDecl(
+		int
+		i
+		0
+		FieldDecl(
+			boolean
+			x
+			10
+			FieldDecl(
+				int
+				j
+				FieldDecl(
+					int
+					k
+				)
+			)
+		)
+	)
+)

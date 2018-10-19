@@ -1,0 +1,12 @@
+class Program {
+	int main() {
+		callout("printf", "hello world\n");
+		return 0;
+	}
+	int hello() {
+	    int b;
+	    int a;
+	    b+=10;
+	    return b;
+	}
+}
