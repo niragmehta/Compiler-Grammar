@@ -1,4 +1,7 @@
 // Generated from A2_grammar.g4 by ANTLR 4.7.1
+
+import java.io.*;
+
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.*;
@@ -94,6 +97,51 @@ public class A2_grammarParser extends Parser {
 
 	@Override
 	public ATN getATN() { return _ATN; }
+
+
+	public class Graph {
+
+	    private Node root;
+
+	    public Graph() {
+	    }
+
+	    public Node GetRoot(){
+
+	        return root;
+	    }
+
+
+	    public Node addRoot(String str){
+	        root = new Node(str);
+	        return root;
+	    }
+
+	};
+
+	public class Node {
+
+	    private String name;
+	    private List<Node> edges;
+
+	    public Node(String string) {
+	        name = string;
+	        edges = new ArrayList<Node>();
+	    }
+
+	    public void addEdge(Node node){
+	        edges.add(node);
+	    }
+
+	    public String getName() {
+	        return name;
+	    }
+
+	    public List<Node> getEdges() {
+	        return edges;
+	    }
+	};
+
 
 	public A2_grammarParser(TokenStream input) {
 		super(input);

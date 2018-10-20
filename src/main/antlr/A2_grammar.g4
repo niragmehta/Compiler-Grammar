@@ -1,54 +1,55 @@
 grammar A2_grammar;
 
-//
-//@header {
-//import java.io.*;
-//
-//@members
-//public class Graph {
-//
-//    private Node root;
-//
-//    public Graph() {
-//    }
-//
-//    public Node GetRoot(){
-//
-//        return root;
-//    }
-//
-//
-//    public Node addRoot(String str){
-//        root = new Node(str);
-//        return root;
-//    }
-//
-//};
-//
-//public class Node {
-//
-//    private String name;
-//    private List<Node> edges;
-//
-//    public Node(String string) {
-//        name = string;
-//        edges = new ArrayList<Node>();
-//    }
-//
-//    public void addEdge(Node node){
-//        edges.add(node);
-//    }
-//
-//    public String getName() {
-//        return name;
-//    }
-//
-//    public List<Node> getEdges() {
-//        return edges;
-//    }
-//};
-//
-//}
+
+@header {
+import java.io.*;
+}
+
+@parser::members{
+public class Graph {
+
+    private Node root;
+
+    public Graph() {
+    }
+
+    public Node GetRoot(){
+
+        return root;
+    }
+
+
+    public Node addRoot(String str){
+        root = new Node(str);
+        return root;
+    }
+
+};
+
+public class Node {
+
+    private String name;
+    private List<Node> edges;
+
+    public Node(String string) {
+        name = string;
+        edges = new ArrayList<Node>();
+    }
+
+    public void addEdge(Node node){
+        edges.add(node);
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public List<Node> getEdges() {
+        return edges;
+    }
+};
+
+}
 
 //prog
 //:'class Program {'field_decl* method_decl*'}';

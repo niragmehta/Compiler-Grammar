@@ -1,4 +1,7 @@
 // Generated from A2_grammar.g4 by ANTLR 4.7.1
+
+import java.io.*;
+
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.Token;
