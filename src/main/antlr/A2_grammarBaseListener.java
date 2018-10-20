@@ -39,6 +39,18 @@ public class A2_grammarBaseListener implements A2_grammarListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterTemp(A2_grammarParser.TempContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitTemp(A2_grammarParser.TempContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterMethod_decl(A2_grammarParser.Method_declContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -46,6 +58,18 @@ public class A2_grammarBaseListener implements A2_grammarListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitMethod_decl(A2_grammarParser.Method_declContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterTempParam(A2_grammarParser.TempParamContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitTempParam(A2_grammarParser.TempParamContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -70,6 +94,18 @@ public class A2_grammarBaseListener implements A2_grammarListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitVar_decl(A2_grammarParser.Var_declContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterVar_decl_extra(A2_grammarParser.Var_decl_extraContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitVar_decl_extra(A2_grammarParser.Var_decl_extraContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

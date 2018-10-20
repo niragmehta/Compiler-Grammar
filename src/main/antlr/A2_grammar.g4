@@ -55,20 +55,48 @@ prog
 
 
 
+//field_decl
+//: Type (Ident | Ident'['int_literal']') ';'
+//| Type (Ident | Ident'['int_literal']')
+//| field_decl ( ',' Ident | Ident'['int_literal']') ';'
+//| Type Ident '=' literal SemiColon ;
+
 field_decl
 : Type (Ident | Ident'['int_literal']') ';'
+| Type Ident '=' literal SemiColon
 | Type (Ident | Ident'['int_literal']')
-| field_decl ( ',' Ident | Ident'['int_literal']') ';'
-| Type Ident '=' literal SemiColon ;
+| field_decl temp
+;
+
+temp:
+',' Ident
+| Ident'['int_literal']'
+;
+
+//method_decl
+//: (Type | 'void') Ident'('( (Type Ident) ( ','Type Ident)*)? ')'block;
 
 method_decl
-: (Type | 'void') Ident'('( (Type Ident) ( ','Type Ident)*)? ')'block;
+: (Type | 'void') Ident'(' tempParam ')'block;
+
+tempParam
+: (Type Ident)
+| (Type Ident) tempParam
+| ( ','Type Ident)
+|
+;
 
 block
 : '{'var_decl* statement*'}';
 
 var_decl
-: Type Ident(','Ident)* ';';
+: Type Ident var_decl_extra ';';
+
+var_decl_extra:
+','Ident var_decl_extra
+|
+;
+
 
 statement
 : location ('='|'+='|'-=') expr SemiColon

@@ -27,6 +27,16 @@ public interface A2_grammarListener extends ParseTreeListener {
 	 */
 	void exitField_decl(A2_grammarParser.Field_declContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link A2_grammarParser#temp}.
+	 * @param ctx the parse tree
+	 */
+	void enterTemp(A2_grammarParser.TempContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link A2_grammarParser#temp}.
+	 * @param ctx the parse tree
+	 */
+	void exitTemp(A2_grammarParser.TempContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link A2_grammarParser#method_decl}.
 	 * @param ctx the parse tree
 	 */
@@ -36,6 +46,16 @@ public interface A2_grammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitMethod_decl(A2_grammarParser.Method_declContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link A2_grammarParser#tempParam}.
+	 * @param ctx the parse tree
+	 */
+	void enterTempParam(A2_grammarParser.TempParamContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link A2_grammarParser#tempParam}.
+	 * @param ctx the parse tree
+	 */
+	void exitTempParam(A2_grammarParser.TempParamContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link A2_grammarParser#block}.
 	 * @param ctx the parse tree
@@ -56,6 +76,16 @@ public interface A2_grammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitVar_decl(A2_grammarParser.Var_declContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link A2_grammarParser#var_decl_extra}.
+	 * @param ctx the parse tree
+	 */
+	void enterVar_decl_extra(A2_grammarParser.Var_decl_extraContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link A2_grammarParser#var_decl_extra}.
+	 * @param ctx the parse tree
+	 */
+	void exitVar_decl_extra(A2_grammarParser.Var_decl_extraContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link A2_grammarParser#statement}.
 	 * @param ctx the parse tree
