@@ -54,14 +54,14 @@ grammar A2_grammar;
 //:'class Program {'field_decl* method_decl*'}';
 
 prog
-:'class Program {'field_declarations method_declTemp'}';
+:'class Program {'field_declarations method_declarations'}';
 
 field_declarations:
 field_decl field_declarations
 |
 ;
-method_declTemp:
-method_decl method_declTemp
+method_declarations:
+method_decl method_declarations
 |
 ;
 
@@ -143,9 +143,23 @@ expr
 | '!' expr
 | '(' expr ')';
 
+//method_call
+//: method_name '(' (expr ( ',' expr )*)? ')'
+//| Callout '(' Str ( ',' callout_arg )* ')';
+
 method_call
-: method_name '(' (expr ( ',' expr )*)? ')'
-| Callout '(' Str ( ',' callout_arg )* ')';
+: method_name '(' (expr methodArgs)? ')'
+| Callout '(' Str calloutArgs ')';
+
+methodArgs:
+( ',' expr ) methodArgs
+|
+;
+
+calloutArgs:
+( ',' callout_arg ) calloutArgs
+|
+;
 
 callout_arg
 : expr

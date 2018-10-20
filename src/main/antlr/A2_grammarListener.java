@@ -27,15 +27,15 @@ public interface A2_grammarListener extends ParseTreeListener {
 	 */
 	void exitField_declarations(A2_grammarParser.Field_declarationsContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link A2_grammarParser#method_declTemp}.
+	 * Enter a parse tree produced by {@link A2_grammarParser#method_declarations}.
 	 * @param ctx the parse tree
 	 */
-	void enterMethod_declTemp(A2_grammarParser.Method_declTempContext ctx);
+	void enterMethod_declarations(A2_grammarParser.Method_declarationsContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link A2_grammarParser#method_declTemp}.
+	 * Exit a parse tree produced by {@link A2_grammarParser#method_declarations}.
 	 * @param ctx the parse tree
 	 */
-	void exitMethod_declTemp(A2_grammarParser.Method_declTempContext ctx);
+	void exitMethod_declarations(A2_grammarParser.Method_declarationsContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link A2_grammarParser#field_decl}.
 	 * @param ctx the parse tree
@@ -156,6 +156,26 @@ public interface A2_grammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitMethod_call(A2_grammarParser.Method_callContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link A2_grammarParser#methodArgs}.
+	 * @param ctx the parse tree
+	 */
+	void enterMethodArgs(A2_grammarParser.MethodArgsContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link A2_grammarParser#methodArgs}.
+	 * @param ctx the parse tree
+	 */
+	void exitMethodArgs(A2_grammarParser.MethodArgsContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link A2_grammarParser#calloutArgs}.
+	 * @param ctx the parse tree
+	 */
+	void enterCalloutArgs(A2_grammarParser.CalloutArgsContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link A2_grammarParser#calloutArgs}.
+	 * @param ctx the parse tree
+	 */
+	void exitCalloutArgs(A2_grammarParser.CalloutArgsContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link A2_grammarParser#callout_arg}.
 	 * @param ctx the parse tree

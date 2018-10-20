@@ -39,13 +39,13 @@ public class A2_grammarBaseListener implements A2_grammarListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterMethod_declTemp(A2_grammarParser.Method_declTempContext ctx) { }
+	@Override public void enterMethod_declarations(A2_grammarParser.Method_declarationsContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitMethod_declTemp(A2_grammarParser.Method_declTempContext ctx) { }
+	@Override public void exitMethod_declarations(A2_grammarParser.Method_declarationsContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -190,6 +190,30 @@ public class A2_grammarBaseListener implements A2_grammarListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitMethod_call(A2_grammarParser.Method_callContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterMethodArgs(A2_grammarParser.MethodArgsContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitMethodArgs(A2_grammarParser.MethodArgsContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterCalloutArgs(A2_grammarParser.CalloutArgsContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitCalloutArgs(A2_grammarParser.CalloutArgsContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
