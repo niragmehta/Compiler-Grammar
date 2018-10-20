@@ -29,7 +29,7 @@ public class Graph {
 public class Node {
 
     private String name;
-    private List<Node> edges;
+    private List<Node> edges ;
 
     public Node(String string) {
         name = string;
@@ -47,6 +47,10 @@ public class Node {
     public List<Node> getEdges() {
         return edges;
     }
+
+    public void printName(){
+        System.out.println(name);
+    }
 };
 
 }
@@ -55,14 +59,31 @@ public class Node {
 //:'class Program {'field_decl* method_decl*'}';
 
 prog
-:'class Program {'field_declarations method_declarations'}';
+:'class Program {'field_declarations method_declarations'}'
+{
+    Graph g = new Graph();
+    Node root  = g.addRoot("program");
 
-field_declarations:
+    root.addEdge($field_declarations.node);
+    root.addEdge($method_declarations.node);
+
+};
+
+field_declarations returns [Node node]:
 field_decl field_declarations
+{
+    $node = new Node("field_declarations");
+    $node.addEdge($field_decl.node);
+
+}
 |
 ;
-method_declarations:
+method_declarations returns [Node node]:
 method_decl method_declarations
+{
+    $node = new Node("method_declarations");
+    $node.addEdge($method_decl.node);
+}
 |
 ;
 
@@ -72,8 +93,8 @@ method_decl method_declarations
 //| field_decl ( ',' Ident | Ident'['int_literal']') ';'
 //| Type Ident '=' literal SemiColon ;
 
-field_decl
-: Type (Ident | Ident'['int_literal']') ';'
+field_decl returns [Node node]:
+ Type (Ident | Ident'['int_literal']') ';'
 | Type Ident '=' literal SemiColon
 | Type (Ident | Ident'['int_literal']')
 | temp field_decl
@@ -87,7 +108,7 @@ temp:
 //method_decl
 //: (Type | 'void') Ident'('( (Type Ident) ( ','Type Ident)*)? ')'block;
 
-method_decl
+method_decl returns [Node node]
 : (Type | 'void') Ident'(' tempParam ')'block;
 
 tempParam
