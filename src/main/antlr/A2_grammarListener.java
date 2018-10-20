@@ -17,6 +17,26 @@ public interface A2_grammarListener extends ParseTreeListener {
 	 */
 	void exitProg(A2_grammarParser.ProgContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link A2_grammarParser#field_declarations}.
+	 * @param ctx the parse tree
+	 */
+	void enterField_declarations(A2_grammarParser.Field_declarationsContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link A2_grammarParser#field_declarations}.
+	 * @param ctx the parse tree
+	 */
+	void exitField_declarations(A2_grammarParser.Field_declarationsContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link A2_grammarParser#method_declTemp}.
+	 * @param ctx the parse tree
+	 */
+	void enterMethod_declTemp(A2_grammarParser.Method_declTempContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link A2_grammarParser#method_declTemp}.
+	 * @param ctx the parse tree
+	 */
+	void exitMethod_declTemp(A2_grammarParser.Method_declTempContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link A2_grammarParser#field_decl}.
 	 * @param ctx the parse tree
 	 */
@@ -67,6 +87,16 @@ public interface A2_grammarListener extends ParseTreeListener {
 	 */
 	void exitBlock(A2_grammarParser.BlockContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link A2_grammarParser#var_decl_temp}.
+	 * @param ctx the parse tree
+	 */
+	void enterVar_decl_temp(A2_grammarParser.Var_decl_tempContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link A2_grammarParser#var_decl_temp}.
+	 * @param ctx the parse tree
+	 */
+	void exitVar_decl_temp(A2_grammarParser.Var_decl_tempContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link A2_grammarParser#var_decl}.
 	 * @param ctx the parse tree
 	 */
@@ -96,6 +126,16 @@ public interface A2_grammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitStatement(A2_grammarParser.StatementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link A2_grammarParser#statements}.
+	 * @param ctx the parse tree
+	 */
+	void enterStatements(A2_grammarParser.StatementsContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link A2_grammarParser#statements}.
+	 * @param ctx the parse tree
+	 */
+	void exitStatements(A2_grammarParser.StatementsContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link A2_grammarParser#expr}.
 	 * @param ctx the parse tree

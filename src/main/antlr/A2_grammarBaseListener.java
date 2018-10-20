@@ -27,6 +27,30 @@ public class A2_grammarBaseListener implements A2_grammarListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterField_declarations(A2_grammarParser.Field_declarationsContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitField_declarations(A2_grammarParser.Field_declarationsContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterMethod_declTemp(A2_grammarParser.Method_declTempContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitMethod_declTemp(A2_grammarParser.Method_declTempContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterField_decl(A2_grammarParser.Field_declContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -87,6 +111,18 @@ public class A2_grammarBaseListener implements A2_grammarListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterVar_decl_temp(A2_grammarParser.Var_decl_tempContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitVar_decl_temp(A2_grammarParser.Var_decl_tempContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterVar_decl(A2_grammarParser.Var_declContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -118,6 +154,18 @@ public class A2_grammarBaseListener implements A2_grammarListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitStatement(A2_grammarParser.StatementContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterStatements(A2_grammarParser.StatementsContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitStatements(A2_grammarParser.StatementsContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

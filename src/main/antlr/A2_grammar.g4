@@ -50,10 +50,20 @@ grammar A2_grammar;
 //
 //}
 
+//prog
+//:'class Program {'field_decl* method_decl*'}';
+
 prog
-:'class Program {'field_decl* method_decl*'}';
+:'class Program {'field_declarations method_declTemp'}';
 
-
+field_declarations:
+field_decl field_declarations
+|
+;
+method_declTemp:
+method_decl method_declTemp
+|
+;
 
 //field_decl
 //: Type (Ident | Ident'['int_literal']') ';'
@@ -65,9 +75,9 @@ field_decl
 : Type (Ident | Ident'['int_literal']') ';'
 | Type Ident '=' literal SemiColon
 | Type (Ident | Ident'['int_literal']')
-| field_decl temp
+| temp field_decl
+| (',' Ident| Ident'['int_literal']') SemiColon
 ;
-
 temp:
 ',' Ident
 | Ident'['int_literal']'
@@ -86,8 +96,19 @@ tempParam
 |
 ;
 
+//block
+//: '{'var_decl* statement*'}';
+
 block
-: '{'var_decl* statement*'}';
+: '{'var_decl_temp statements'}';
+
+var_decl_temp:
+var_decl var_decl_temp
+|
+;
+
+//var_decl
+//: Type Ident(','Ident)* ';'
 
 var_decl
 : Type Ident var_decl_extra ';';
@@ -96,7 +117,6 @@ var_decl_extra:
 ','Ident var_decl_extra
 |
 ;
-
 
 statement
 : location ('='|'+='|'-=') expr SemiColon
@@ -108,6 +128,11 @@ statement
 | 'break' SemiColon
 | 'continue' SemiColon
 | block;
+
+statements:
+statement statements
+|
+;
 
 expr
 : location
