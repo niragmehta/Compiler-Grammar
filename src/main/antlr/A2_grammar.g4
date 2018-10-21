@@ -57,14 +57,19 @@ public class Node {
         System.out.println(name);
     }
 
-    public void printTree()
+
+    public void printTree(int spaces)
     {
         if(this.edges.isEmpty() )
         {
-            System.out.println(this.getName());
+            for(int i=0;i<=spaces;i++){
+                System.out.print(" ");}
+            System.out.print(this.getName()+"\n");
             return;
         }
-        System.out.println(this.getName()+"(");
+        for(int i=0;i<=spaces;i++){
+            System.out.print(" ");}
+        System.out.print(this.getName()+"(\n");
         for(int i=0;i<this.edges.size();i++)
         {
             Node node = this.edges.get(i);
@@ -72,10 +77,11 @@ public class Node {
             if(node==null)
                 continue;
 
-            node.printTree();
-            //printTree(node.edges.get(i));
+            node.printTree(++spaces);
         }
-        System.out.println(")");
+        for(int i=0;i<spaces;i++){
+                    System.out.print(" ");}
+        System.out.print(")\n");
     }
 
 };
@@ -92,7 +98,8 @@ prog
     Node root  = g.addRoot("program");
     root.addEdge($field_declaration.node);
     root.addEdge($method_declarations.node);
-    root.printTree();
+    int spaces=0;
+    root.printTree(spaces);
 
 };
 

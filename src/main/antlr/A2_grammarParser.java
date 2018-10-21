@@ -148,14 +148,19 @@ public class A2_grammarParser extends Parser {
 	        System.out.println(name);
 	    }
 
-	    public void printTree()
+
+	    public void printTree(int spaces)
 	    {
 	        if(this.edges.isEmpty() )
 	        {
-	            System.out.println(this.getName());
+	            for(int i=0;i<=spaces;i++){
+	                System.out.print(" ");}
+	            System.out.print(this.getName()+"\n");
 	            return;
 	        }
-	        System.out.println(this.getName()+"(");
+	        for(int i=0;i<=spaces;i++){
+	            System.out.print(" ");}
+	        System.out.print(this.getName()+"(\n");
 	        for(int i=0;i<this.edges.size();i++)
 	        {
 	            Node node = this.edges.get(i);
@@ -163,10 +168,11 @@ public class A2_grammarParser extends Parser {
 	            if(node==null)
 	                continue;
 
-	            node.printTree();
-	            //printTree(node.edges.get(i));
+	            node.printTree(++spaces);
 	        }
-	        System.out.println(")");
+	        for(int i=0;i<spaces;i++){
+	                    System.out.print(" ");}
+	        System.out.print(")\n");
 	    }
 
 	};
@@ -222,7 +228,8 @@ public class A2_grammarParser extends Parser {
 			    Node root  = g.addRoot("program");
 			    root.addEdge(((ProgContext)_localctx).field_declaration.node);
 			    root.addEdge(((ProgContext)_localctx).method_declarations.node);
-			    root.printTree();
+			    int spaces=0;
+			    root.printTree(spaces);
 
 
 			}
@@ -285,7 +292,6 @@ public class A2_grammarParser extends Parser {
 			case CBrace:
 				enterOuterAlt(_localctx, 2);
 				{
-				((Method_declarationsContext)_localctx).node =  new Node("method_declarations");
 				}
 				break;
 			default:
@@ -1486,9 +1492,7 @@ public class A2_grammarParser extends Parser {
 				match(CParen);
 
 				   ((ExprContext)_localctx).node =  new Node("expr");
-				//   _localctx.node.addEdge(new Node("("));
 				   _localctx.node.addEdge(((ExprContext)_localctx).expr.node);
-				//   _localctx.node.addEdge(new Node(")"));
 
 				}
 				break;
@@ -1600,10 +1604,8 @@ public class A2_grammarParser extends Parser {
 
 				    ((Method_callContext)_localctx).node =  new Node("method_call");
 				    _localctx.node.addEdge(((Method_callContext)_localctx).method_name.node);
-				//    _localctx.node.addEdge(new Node("("));
 				    _localctx.node.addEdge(((Method_callContext)_localctx).expr.node);
 				    _localctx.node.addEdge(((Method_callContext)_localctx).methodArgs.node);
-				//    _localctx.node.addEdge(new Node(")"));
 
 				}
 				break;
@@ -1711,7 +1713,6 @@ public class A2_grammarParser extends Parser {
 			case CParen:
 				enterOuterAlt(_localctx, 2);
 				{
-				((MethodArgsContext)_localctx).node =  new Node("methodArgs");
 				}
 				break;
 			default:
@@ -2272,7 +2273,7 @@ public class A2_grammarParser extends Parser {
 		"\2\36\u0144\3\2\2\2 \u014b\3\2\2\2\"\u014d\3\2\2\2$\u0158\3\2\2\2&\u0161"+
 		"\3\2\2\2(\u016b\3\2\2\2*\u0171\3\2\2\2,-\7\n\2\2-.\7\13\2\2./\7!\2\2/"+
 		"\60\5\6\4\2\60\61\5\4\3\2\61\62\7\"\2\2\62\63\b\2\1\2\63\3\3\2\2\2\64"+
-		"\65\5\n\6\2\65\66\5\4\3\2\66\67\b\3\1\2\67:\3\2\2\28:\b\3\1\29\64\3\2"+
+		"\65\5\n\6\2\65\66\5\4\3\2\66\67\b\3\1\2\67:\3\2\2\28:\3\2\2\29\64\3\2"+
 		"\2\298\3\2\2\2:\5\3\2\2\2;<\7\31\2\2<=\7\32\2\2=>\7%\2\2>?\5\6\4\2?@\b"+
 		"\4\1\2@e\3\2\2\2AB\7\31\2\2BC\7\32\2\2CD\7#\2\2DE\5*\26\2EF\7$\2\2FG\7"+
 		"%\2\2GH\5\6\4\2HI\b\4\1\2Ie\3\2\2\2JK\7\31\2\2KL\7\32\2\2LM\7\3\2\2MN"+
@@ -2344,7 +2345,7 @@ public class A2_grammarParser extends Parser {
 		"\36\20\2\u012f\u0130\7 \2\2\u0130\u0131\b\16\1\2\u0131\u0133\3\2\2\2\u0132"+
 		"\u011e\3\2\2\2\u0132\u0126\3\2\2\2\u0132\u012b\3\2\2\2\u0133\33\3\2\2"+
 		"\2\u0134\u0135\7&\2\2\u0135\u0136\5\30\r\2\u0136\u0137\3\2\2\2\u0137\u0138"+
-		"\5\34\17\2\u0138\u0139\b\17\1\2\u0139\u013c\3\2\2\2\u013a\u013c\b\17\1"+
+		"\5\34\17\2\u0138\u0139\b\17\1\2\u0139\u013c\3\2\2\2\u013a\u013c\3\2\2"+
 		"\2\u013b\u0134\3\2\2\2\u013b\u013a\3\2\2\2\u013c\35\3\2\2\2\u013d\u013e"+
 		"\7&\2\2\u013e\u013f\5 \21\2\u013f\u0140\3\2\2\2\u0140\u0141\5\36\20\2"+
 		"\u0141\u0142\b\20\1\2\u0142\u0145\3\2\2\2\u0143\u0145\3\2\2\2\u0144\u013d"+
