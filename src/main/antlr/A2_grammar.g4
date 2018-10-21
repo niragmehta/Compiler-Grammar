@@ -287,24 +287,14 @@ methodParam returns [Node node]
 //: '{'var_decl* statement*'}';
 
 block returns [Node node]
-: '{'multi_var_decl statements'}'
+: '{'var_decl statements'}'
 {
     $node = new Node("block");
     $node.addEdge(new Node("{"));
-    $node.addEdge($multi_var_decl.node);
+    $node.addEdge($var_decl.node);
     $node.addEdge($statements.node);
     $node.addEdge(new Node("}"));
 };
-
-multi_var_decl returns [Node node]
-:var_decl multi_var_decl
-{
-    $node = new Node("multi_var_decl");
-    $node.addEdge($var_decl.node);
-    $node.addEdge($multi_var_decl.node);
-}
-|
-;
 
 //var_decl
 //: Type Ident(','Ident)* ';'
@@ -312,19 +302,29 @@ multi_var_decl returns [Node node]
 var_decl returns [Node node]
 : Type Ident var_decl_extra ';'
 {
-    $node = new Node("multi_var_decl");
+    $node = new Node("var_decl");
     $node.addEdge(new Node($Type.text));
     $node.addEdge(new Node($Ident.text));
     $node.addEdge($var_decl_extra.node);
     $node.addEdge(new Node(";"));
 
-};
+}
+| Type Ident var_decl_extra ';' var_decl
+{
+    $node = new Node("var_decl");
+    $node.addEdge(new Node($Type.text));
+    $node.addEdge(new Node($Ident.text));
+    $node.addEdge($var_decl_extra.node);
+    $node.addEdge(new Node(";"));
+    $node.addEdge($var_decl.node);
+}
+|
+;
 
 var_decl_extra returns [Node node]
 :','Ident var_decl_extra
 {
     $node = new Node("var_decl_extra");
-
     $node.addEdge(new Node(","));
     $node.addEdge(new Node($Ident.text));
     $node.addEdge($var_decl_extra.node);

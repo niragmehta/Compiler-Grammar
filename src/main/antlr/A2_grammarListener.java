@@ -90,16 +90,6 @@ public interface A2_grammarListener extends ParseTreeListener {
 	 */
 	void exitBlock(A2_grammarParser.BlockContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link A2_grammarParser#multi_var_decl}.
-	 * @param ctx the parse tree
-	 */
-	void enterMulti_var_decl(A2_grammarParser.Multi_var_declContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link A2_grammarParser#multi_var_decl}.
-	 * @param ctx the parse tree
-	 */
-	void exitMulti_var_decl(A2_grammarParser.Multi_var_declContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link A2_grammarParser#var_decl}.
 	 * @param ctx the parse tree
 	 */

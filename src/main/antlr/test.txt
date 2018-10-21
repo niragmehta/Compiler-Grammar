@@ -3,10 +3,11 @@ class Program {
 
 	int abc(int a)
 	{
-	int b;
-	    if(b == 5)
+	    int b, c;
+	    int d ,e;
+	    if( 5)
         	{
-        	    x=5;
+
         	}
         abc(56);
 	}

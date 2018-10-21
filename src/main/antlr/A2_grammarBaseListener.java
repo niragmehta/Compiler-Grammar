@@ -114,18 +114,6 @@ public class A2_grammarBaseListener implements A2_grammarListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterMulti_var_decl(A2_grammarParser.Multi_var_declContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitMulti_var_decl(A2_grammarParser.Multi_var_declContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterVar_decl(A2_grammarParser.Var_declContext ctx) { }
 	/**
 	 * {@inheritDoc}
