@@ -29,7 +29,8 @@ public class Graph {
 public class Node {
 
     private String name;
-    private List<Node> edges ;
+    public List<Node> edges ;
+
 
     public Node(String string) {
         name = string;
@@ -47,10 +48,36 @@ public class Node {
     public List<Node> getEdges() {
         return edges;
     }
+    public void removeEdge(int i){
+        edges.remove(i);
+    }
+
 
     public void printName(){
         System.out.println(name);
     }
+
+    public void printTree()
+    {
+        if(this.edges.isEmpty() )
+        {
+            System.out.println(this.getName());
+            return;
+        }
+        System.out.println(this.getName()+"(");
+        for(int i=0;i<this.edges.size();i++)
+        {
+            Node node = this.edges.get(i);
+
+            if(node==null)
+                continue;
+
+            node.printTree();
+            //printTree(node.edges.get(i));
+        }
+        System.out.println(")");
+    }
+
 };
 
 }
@@ -59,13 +86,13 @@ public class Node {
 //:'class Program {'field_decl* method_decl*'}';
 
 prog
-:'class Program {'field_declaration method_declarations'}'
+:'class' 'Program' '{' field_declaration method_declarations'}'
 {
     Graph g = new Graph();
     Node root  = g.addRoot("program");
-
     root.addEdge($field_declaration.node);
     root.addEdge($method_declarations.node);
+    root.printTree();
 
 };
 
@@ -100,7 +127,7 @@ field_declaration returns [Node node]:
 
     $node.addEdge(new Node($Type.text));
     $node.addEdge(new Node($Ident.text));
-    $node.addEdge(new Node($SemiColon.text));
+//    $node.addEdge(new Node($SemiColon.text));
     $node.addEdge($field_declaration.node);
 
  }
@@ -110,10 +137,10 @@ field_declaration returns [Node node]:
 
     $node.addEdge(new Node($Type.text));
     $node.addEdge(new Node($Ident.text));
-    $node.addEdge(new Node("["));
+//    $node.addEdge(new Node("["));
     $node.addEdge($int_literal.node);
-    $node.addEdge(new Node("]"));
-    $node.addEdge(new Node($SemiColon.text));
+//    $node.addEdge(new Node("]"));
+//    $node.addEdge(new Node($SemiColon.text));
     $node.addEdge($field_declaration.node);
 
 }
@@ -123,9 +150,9 @@ field_declaration returns [Node node]:
 
     $node.addEdge(new Node($Type.text));
     $node.addEdge(new Node($Ident.text));
-    $node.addEdge(new Node("="));
+//    $node.addEdge(new Node("="));
     $node.addEdge($literal.node);
-    $node.addEdge(new Node($SemiColon.text));
+//    $node.addEdge(new Node($SemiColon.text));
     $node.addEdge($field_declaration.node);
 }
 | Type Ident multi_declaration SemiColon field_declaration
@@ -135,7 +162,7 @@ field_declaration returns [Node node]:
     $node.addEdge(new Node($Type.text));
     $node.addEdge(new Node($Ident.text));
     $node.addEdge($multi_declaration.node);
-    $node.addEdge(new Node(";"));
+//    $node.addEdge(new Node($SemiColon.text));
     $node.addEdge($field_declaration.node);
 }
 | Type Ident'['int_literal']' multi_declaration SemiColon field_declaration
@@ -144,11 +171,11 @@ field_declaration returns [Node node]:
 
     $node.addEdge(new Node($Type.text));
     $node.addEdge(new Node($Ident.text));
-    $node.addEdge(new Node("["));
+//    $node.addEdge(new Node("["));
     $node.addEdge($int_literal.node);
-    $node.addEdge(new Node("]"));
+//    $node.addEdge(new Node("]"));
     $node.addEdge($multi_declaration.node);
-    $node.addEdge(new Node(";"));
+//    $node.addEdge(new Node($SemiColon.text));
     $node.addEdge($field_declaration.node);
 }
 |
@@ -159,20 +186,18 @@ multi_declaration returns [Node node]:
 ',' Ident
 {
     $node = new Node("multi_declaration");
-    Node node1 = new Node(",");
-    Node node2 = new Node($Ident.text);
+    Node node1 = new Node($Ident.text);
     $node.addEdge(node1);
-    $node.addEdge(node2);
 }
 | ',' Ident'['int_literal']'
 {
     $node = new Node("multi_declaration");
 
-    $node.addEdge(new Node(","));
+//    $node.addEdge(new Node(","));
     $node.addEdge(new Node($Ident.text));
-    $node.addEdge(new Node("["));
+//    $node.addEdge(new Node("["));
     $node.addEdge($int_literal.node);
-    $node.addEdge(new Node("]"));
+//    $node.addEdge(new Node("]"));
 }
 ;
 
@@ -186,13 +211,9 @@ method_decl returns [Node node]
 
     Node node1 = new Node($Type.text);
     Node node2 = new Node($Ident.text);
-    Node node3 = new Node("(");
-    Node node4 = new Node(")");
     $node.addEdge(node1);
     $node.addEdge(node2);
-    $node.addEdge(node3);
     $node.addEdge($methodParam.node);
-    $node.addEdge(node4);
     $node.addEdge($block.node);
 
 }
@@ -200,15 +221,11 @@ method_decl returns [Node node]
 {
     $node = new Node("method_decl");
     Node node1 = new Node($Void.text);
-    Node node2 = new Node("void");
-    Node node3 = new Node("(");
-    Node node4 = new Node(")");
+    Node node2 = new Node($Ident.text);
 
     $node.addEdge(node1);
     $node.addEdge(node2);
-    $node.addEdge(node3);
     $node.addEdge($methodParam.node);
-    $node.addEdge(node4);
     $node.addEdge($block.node);
 
 };
@@ -229,24 +246,18 @@ methodParam returns [Node node]
 | ( ','Type Ident)
 {
     $node = new Node("methodParam");
-    $node.addEdge(new Node(","));
     $node.addEdge(new Node($Type.text));
     $node.addEdge(new Node($Ident.text));
 }
 |
 ;
 
-//block
-//: '{'var_decl* statement*'}';
-
 block returns [Node node]
 : '{'var_decl statements'}'
 {
     $node = new Node("block");
-    $node.addEdge(new Node("{"));
     $node.addEdge($var_decl.node);
     $node.addEdge($statements.node);
-    $node.addEdge(new Node("}"));
 };
 
 //var_decl
@@ -259,16 +270,14 @@ var_decl returns [Node node]
     $node.addEdge(new Node($Type.text));
     $node.addEdge(new Node($Ident.text));
     $node.addEdge($var_decl_extra.node);
-    $node.addEdge(new Node(";"));
-
 }
 | Type Ident var_decl_extra ';' var_decl
 {
     $node = new Node("var_decl");
+
     $node.addEdge(new Node($Type.text));
     $node.addEdge(new Node($Ident.text));
     $node.addEdge($var_decl_extra.node);
-    $node.addEdge(new Node(";"));
     $node.addEdge($var_decl.node);
 }
 |
@@ -278,7 +287,6 @@ var_decl_extra returns [Node node]
 :','Ident var_decl_extra
 {
     $node = new Node("var_decl_extra");
-    $node.addEdge(new Node(","));
     $node.addEdge(new Node($Ident.text));
     $node.addEdge($var_decl_extra.node);
 }
@@ -286,15 +294,85 @@ var_decl_extra returns [Node node]
 ;
 
 statement returns [Node node]
-: location ('='|'+='|'-=') expr SemiColon
-| method_call';'
-| 'if' OParen expr CParen block ('else' block  )?
-| 'switch' expr '{'('case' literal ':' statement*)+'}'
+: location AssignOp expr SemiColon
+{
+    $node = new Node("statement");
+    $node.addEdge($location.node);
+    $node.addEdge(new Node($AssignOp.text));
+    $node.addEdge($expr.node);
+}
+| method_call SemiColon
+{
+    $node = new Node("statement");
+    $node.addEdge($method_call.node);
+}
+| 'if' OParen expr CParen block ('else' block)
+{
+    $node = new Node("statement");
+    $node.addEdge(new Node("if"));
+    $node.addEdge($expr.node);
+    $node.addEdge($block.node);
+    $node.addEdge(new Node("else"));
+    $node.addEdge($block.node);
+}
+|'if' OParen expr CParen block
+{
+    $node = new Node("statement");
+    $node.addEdge(new Node("if"));
+    $node.addEdge($expr.node);
+    $node.addEdge($block.node);
+
+}
+| 'switch' expr '{' ('case' literal ':' statements) '}'
+{
+    $node = new Node("statement");
+
+    $node.addEdge(new Node("switch"));
+    $node.addEdge($expr.node);
+    $node.addEdge(new Node("case"));
+    $node.addEdge($literal.node);
+    $node.addEdge($statements.node);
+}
 | 'while' OParen expr CParen statement
-| 'return' (expr)? SemiColon
+{
+    $node = new Node("statement");
+
+    $node.addEdge(new Node("while"));
+    $node.addEdge($expr.node);
+    $node.addEdge($statement.node);
+}
+| 'return' expr SemiColon
+{
+    $node = new Node("statement");
+
+    $node.addEdge(new Node("return"));
+    $node.addEdge($expr.node);
+
+}
+| 'return' SemiColon
+{
+    $node = new Node("statement");
+
+    $node.addEdge(new Node("return"));
+}
 | 'break' SemiColon
+{
+    $node = new Node("statement");
+
+    $node.addEdge(new Node("break"));
+}
 | 'continue' SemiColon
-| block;
+{
+    $node = new Node("statement");
+
+    $node.addEdge(new Node("continue"));
+}
+| block
+{
+    $node = new Node("statement");
+
+    $node.addEdge($block.node);
+};
 
 statements returns [Node node]
 :statement statements
@@ -344,47 +422,37 @@ expr returns [Node node]
 | '(' expr ')'
 {
    $node = new Node("expr");
-   $node.addEdge(new Node("("));
    $node.addEdge($expr.node);
-   $node.addEdge(new Node(")"));
 };
-
-//method_call
-//: method_name '(' (expr ( ',' expr )*)? ')'
-//| Callout '(' Str ( ',' callout_arg )* ')';
 
 method_call returns [Node node]
 : method_name '(' (expr methodArgs) ')'
 {
     $node = new Node("method_call");
     $node.addEdge($method_name.node);
-    $node.addEdge(new Node("("));
     $node.addEdge($expr.node);
     $node.addEdge($methodArgs.node);
-    $node.addEdge(new Node(")"));
 }
-|
-method_name '(' ')'
+|method_name '(' ')'
 {
    $node.addEdge($method_name.node);
-   $node.addEdge(new Node("("));
-   $node.addEdge(new Node(")"));
+//   $node.addEdge(new Node("("));
+//   $node.addEdge(new Node(")"));
 }
 | Callout '(' Str calloutArgs ')'
 {
     $node = new Node("method_call");
     $node.addEdge(new Node($Callout.text));
-    $node.addEdge(new Node("("));
+//    $node.addEdge(new Node("("));
     $node.addEdge(new Node($Str.text));
     $node.addEdge($calloutArgs.node);
-    $node.addEdge(new Node(")"));
+//    $node.addEdge(new Node(")"));
 };
 
 methodArgs returns [Node node]
 :( ',' expr ) methodArgs
 {
     $node = new Node("methodArgs");
-    $node.addEdge(new Node(","));
     $node.addEdge($expr.node);
     $node.addEdge($methodArgs.node);
 }
@@ -395,7 +463,7 @@ calloutArgs returns [Node node]
 :( ',' callout_arg ) calloutArgs
 {
     $node = new Node("calloutArgs");
-    $node.addEdge(new Node(","));
+//    $node.addEdge(new Node(","));
     $node.addEdge($callout_arg.node);
     $node.addEdge($calloutArgs.node);
 }
@@ -431,9 +499,9 @@ location returns [Node node]
 {
     $node = new Node("location");
     $node.addEdge(new Node($Ident.text));
-    $node.addEdge(new Node("["));
+//    $node.addEdge(new Node("["));
     $node.addEdge($expr.node);
-    $node.addEdge(new Node("]"));
+//    $node.addEdge(new Node("]"));
 };
 
 literal returns [Node node]
