@@ -335,7 +335,7 @@ var_decl_extra returns [Node node]
 statement returns [Node node]
 : location ('='|'+='|'-=') expr SemiColon
 | method_call';'
-| 'if' OParen'expr' CParen block ('else' block  )?
+| 'if' OParen expr CParen block ('else' block  )?
 | 'switch' expr '{'('case' literal ':' statement*)+'}'
 | 'while' OParen expr CParen statement
 | 'return' (expr)? SemiColon
@@ -369,12 +369,12 @@ expr returns [Node node]
    $node = new Node("expr");
    $node.addEdge($literal.node);
 }
-| expr binOp expr
+| e1=expr binOp e2=expr
 {
    $node = new Node("expr");
-   $node.addEdge($expr.node);
+   $node.addEdge($e1.node);
    $node.addEdge($binOp.node);
-   $node.addEdge($expr.node);
+   $node.addEdge($e2.node);
 }
 | '-' expr
 {
@@ -401,52 +401,141 @@ expr returns [Node node]
 //| Callout '(' Str ( ',' callout_arg )* ')';
 
 method_call returns [Node node]
-: method_name '(' (expr methodArgs)? ')'
+: method_name '(' (expr methodArgs) ')'
 {
     $node = new Node("method_call");
+    $node.addEdge($method_name.node);
+    $node.addEdge(new Node("("));
+    $node.addEdge($expr.node);
+    $node.addEdge($methodArgs.node);
+    $node.addEdge(new Node(")"));
 
+}
+|
+method_name '(' ')'
+{
+   $node.addEdge($method_name.node);
+   $node.addEdge(new Node("("));
+   $node.addEdge(new Node(")"));
 }
 | Callout '(' Str calloutArgs ')'
 {
     $node = new Node("method_call");
+    $node.addEdge(new Node($Callout.text));
+    $node.addEdge(new Node("("));
+    $node.addEdge(new Node($Str.text));
+    $node.addEdge($calloutArgs.node);
+    $node.addEdge(new Node(")"));
 };
 
 methodArgs returns [Node node]
 :( ',' expr ) methodArgs
+{
+    $node = new Node("methodArgs");
+    $node.addEdge(new Node(","));
+    $node.addEdge($expr.node);
+    $node.addEdge($methodArgs.node);
+}
 |
 ;
 
 calloutArgs returns [Node node]
 :( ',' callout_arg ) calloutArgs
+{
+    $node = new Node("calloutArgs");
+    $node.addEdge(new Node(","));
+    $node.addEdge($callout_arg.node);
+    $node.addEdge($calloutArgs.node);
+}
 |
 ;
 
 callout_arg returns [Node node]
 : expr
-| Str;
+{
+  $node = new Node("callout_arg");
+  $node.addEdge($expr.node);
+}
+| Str
+{
+   $node = new Node("callout_arg");
+   $node.addEdge(new Node($Str.text));
+};
 
 method_name returns [Node node]
-: Ident;
+: Ident
+{
+    $node = new Node("method_name");
+    $node.addEdge(new Node($Ident.text));
+};
 
 location returns [Node node]
 : Ident
-| Ident '[' expr ']';
+{
+    $node = new Node("location");
+    $node.addEdge(new Node($Ident.text));
+}
+| Ident '[' expr ']'
+{
+    $node = new Node("location");
+    $node.addEdge(new Node($Ident.text));
+    $node.addEdge(new Node("["));
+    $node.addEdge($expr.node);
+    $node.addEdge(new Node("]"));
+};
 
 literal returns [Node node]
 : int_literal
+{
+   $node = new Node("literal");
+   $node.addEdge($int_literal.node);
+}
 | Char
-| BoolLit;
+{
+   $node = new Node("literal");
+   $node.addEdge(new Node($Char.node));
+}
+| BoolLit
+{
+    $node = new Node("literal");
+    $node.addEdge(new Node($BoolLit.node));
+};
 
 binOp returns [Node node]:
-ArithOp |
-Relop |
-AssignOp|
-CondOp
+ArithOp
+{
+    $node = new Node("binOp");
+    $node.addEdge(new Node($ArithOp.node));
+}
+|Relop
+{
+   $node = new Node("binOp");
+   $node.addEdge(new Node($Relop.node));
+}
+|AssignOp
+{
+    $node = new Node("binOp");
+    $node.addEdge(new Node($AssignmOp.node));
+}
+|CondOp
+{
+    $node = new Node("binOp");
+    $node.addEdge(new Node($CondOp.node));
+}
 ;
 
 int_literal returns [Node node]:
-Num |
-HexNum
+Num
+{
+    $node = new Node("int_literal");
+    $node.addEdge(new Node($Num.node));
+}
+| HexNum
+{
+    $node = new Node("int_literal");
+    $node.addEdge(new Node($HexNum.node));
+}
+
 ;
 
 
