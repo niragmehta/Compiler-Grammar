@@ -5,7 +5,7 @@ class Program {
 	{
 	    int b, c;
 	    int d ,e;
-	    if( 5)
+	    if(d==8)
         	{
 
         	}

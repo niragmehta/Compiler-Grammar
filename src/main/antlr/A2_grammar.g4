@@ -357,7 +357,7 @@ expr returns [Node node]
 : location
 {
    $node = new Node("expr");
-   $node.addEdge($expr.node);
+   $node.addEdge($location.node);
 }
 | method_call
 {
