@@ -493,34 +493,34 @@ literal returns [Node node]
 | Char
 {
    $node = new Node("literal");
-   $node.addEdge(new Node($Char.node));
+   $node.addEdge(new Node($Char.text));
 }
 | BoolLit
 {
     $node = new Node("literal");
-    $node.addEdge(new Node($BoolLit.node));
+    $node.addEdge(new Node($BoolLit.text));
 };
 
 binOp returns [Node node]:
 ArithOp
 {
     $node = new Node("binOp");
-    $node.addEdge(new Node($ArithOp.node));
+    $node.addEdge(new Node($ArithOp.text));
 }
 |Relop
 {
    $node = new Node("binOp");
-   $node.addEdge(new Node($Relop.node));
+   $node.addEdge(new Node($Relop.text));
 }
 |AssignOp
 {
     $node = new Node("binOp");
-    $node.addEdge(new Node($AssignmOp.node));
+    $node.addEdge(new Node($AssignOp.text));
 }
 |CondOp
 {
     $node = new Node("binOp");
-    $node.addEdge(new Node($CondOp.node));
+    $node.addEdge(new Node($CondOp.text));
 }
 ;
 
@@ -528,12 +528,12 @@ int_literal returns [Node node]:
 Num
 {
     $node = new Node("int_literal");
-    $node.addEdge(new Node($Num.node));
+    $node.addEdge(new Node($Num.text));
 }
 | HexNum
 {
     $node = new Node("int_literal");
-    $node.addEdge(new Node($HexNum.node));
+    $node.addEdge(new Node($HexNum.text));
 }
 
 ;
