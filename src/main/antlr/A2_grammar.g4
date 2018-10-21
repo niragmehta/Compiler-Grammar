@@ -59,24 +59,24 @@ public class Node {
 //:'class Program {'field_decl* method_decl*'}';
 
 prog
-:'class Program {'field_declarations method_declarations'}'
+:'class Program {'field_declaration method_declarations'}'
 {
     Graph g = new Graph();
     Node root  = g.addRoot("program");
 
-    root.addEdge($field_declarations.node);
+    root.addEdge($field_declaration.node);
     root.addEdge($method_declarations.node);
 
 };
 
-field_declarations returns [Node node]:
-field_declaration field_declarations
-{
-    $node = new Node("field_declarations");
-    $node.addEdge($field_declaration.node);
-}
-|
-;
+//field_declarations returns [Node node]:
+//field_declaration field_declarations
+//{
+//    $node = new Node("field_declarations");
+//    $node.addEdge($field_declaration.node);
+//}
+//|
+//;
 
 method_declarations returns [Node node]:
 method_decl method_declarations
@@ -94,7 +94,7 @@ method_decl method_declarations
 //| Type Ident '=' literal SemiColon ;
 
 field_declaration returns [Node node]:
- Type Ident ';'
+ Type Ident ';' field_declaration
  {
     $node = new Node("field_declaration");
     Node node1 = new Node($Type.text);
@@ -104,9 +104,10 @@ field_declaration returns [Node node]:
     $node.addEdge(node1);
     $node.addEdge(node2);
     $node.addEdge(node3);
+    $node.addEdge($field_declaration.node);
 
  }
-| Type Ident'['int_literal']' ';'
+| Type Ident'['int_literal']' ';' field_declaration
 {
     $node = new Node("field_declaration");
     Node node1 = new Node($Type.text);
@@ -121,23 +122,25 @@ field_declaration returns [Node node]:
     $node.addEdge($int_literal.node);
     $node.addEdge(node4);
     $node.addEdge(node5);
+    $node.addEdge($field_declaration.node);
 
 }
-| Type Ident '=' literal SemiColon
+| Type Ident '=' literal SemiColon field_declaration
 {
     $node = new Node("field_declaration");
+
     Node node1 = new Node($Type.text);
     Node node2 = new Node($Ident.text);
     Node node3 = new Node("=");
     Node node4 = new Node(";");
-
     $node.addEdge(node1);
     $node.addEdge(node2);
     $node.addEdge(node3);
     $node.addEdge($literal.node);
     $node.addEdge(node4);
+    $node.addEdge($field_declaration.node);
 }
-| Type Ident
+| Type Ident multi_declaration SemiColon field_declaration
 {
     $node = new Node("field_declaration");
 
@@ -145,8 +148,11 @@ field_declaration returns [Node node]:
     Node node2 = new Node($Ident.text);
     $node.addEdge(node1);
     $node.addEdge(node2);
+    $node.addEdge($multi_declaration.node);
+    $node.addEdge(new Node(";"));
+    $node.addEdge($field_declaration.node);
 }
-| Type Ident'['int_literal']'
+| Type Ident'['int_literal']' multi_declaration SemiColon field_declaration
 {
     $node = new Node("field_declaration");
 
@@ -160,44 +166,11 @@ field_declaration returns [Node node]:
     $node.addEdge(node3);
     $node.addEdge($int_literal.node);
     $node.addEdge(node4);
+    $node.addEdge($multi_declaration.node);
+    $node.addEdge(new Node(";"));
+    $node.addEdge($field_declaration.node);
 }
-| multi_declaration field_declaration
-{
-    $node = new Node("field_declaration");
-
-   $node.addEdge($multi_declaration.node);
-   $node.addEdge($field_declaration.node);
-}
-| (',' Ident ';')
-{
-    $node = new Node("field_declaration");
-
-    Node node1 = new Node(",");
-    Node node2 = new Node($Ident.text);
-    Node node3 = new Node(";");
-
-     $node.addEdge(node1);
-     $node.addEdge(node2);
-     $node.addEdge(node3);
-
-}
-| ',' Ident'['int_literal']' ';'
-{
-    $node = new Node("field_declaration");
-
-    Node node1 = new Node(",");
-    Node node2 = new Node($Ident.text);
-    Node node3 = new Node("[");
-    Node node4 = new Node("]");
-    Node node5 = new Node(";");
-
-    $node.addEdge(node1);
-    $node.addEdge(node2);
-    $node.addEdge(node3);
-    $node.addEdge($int_literal.node);
-    $node.addEdge(node4);
-    $node.addEdge(node5);
-}
+|
 ;
 
 //multi declaration
@@ -210,12 +183,15 @@ multi_declaration returns [Node node]:
     $node.addEdge(node1);
     $node.addEdge(node2);
 }
-| Ident'['int_literal']'
+| ',' Ident'['int_literal']'
 {
     $node = new Node("multi_declaration");
+
     Node node1 = new Node($Ident.text);
     Node node2 = new Node("[");
     Node node3 = new Node("]");
+
+    $node.addEdge(new Node(","));
     $node.addEdge(node1);
     $node.addEdge(node2);
     $node.addEdge($int_literal.node);
@@ -409,7 +385,6 @@ method_call returns [Node node]
     $node.addEdge($expr.node);
     $node.addEdge($methodArgs.node);
     $node.addEdge(new Node(")"));
-
 }
 |
 method_name '(' ')'

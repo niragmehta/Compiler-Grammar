@@ -30,18 +30,6 @@ public class A2_grammarBaseListener implements A2_grammarListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterField_declarations(A2_grammarParser.Field_declarationsContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitField_declarations(A2_grammarParser.Field_declarationsContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterMethod_declarations(A2_grammarParser.Method_declarationsContext ctx) { }
 	/**
 	 * {@inheritDoc}

@@ -1,16 +1,10 @@
 class Program {
-	int x = 9;
 
-	int abc(int a)
-	{
-	    int b, c;
-	    int d ,e;
-	    if(d==8)
-        	{
+    	int i = 0;
+    	boolean x[10];
+    	int j, k;
 
-        	}
-        abc(56);
-	}
+    }
 
 
-}
+

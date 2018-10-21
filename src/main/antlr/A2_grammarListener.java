@@ -20,16 +20,6 @@ public interface A2_grammarListener extends ParseTreeListener {
 	 */
 	void exitProg(A2_grammarParser.ProgContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link A2_grammarParser#field_declarations}.
-	 * @param ctx the parse tree
-	 */
-	void enterField_declarations(A2_grammarParser.Field_declarationsContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link A2_grammarParser#field_declarations}.
-	 * @param ctx the parse tree
-	 */
-	void exitField_declarations(A2_grammarParser.Field_declarationsContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link A2_grammarParser#method_declarations}.
 	 * @param ctx the parse tree
 	 */
