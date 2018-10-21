@@ -94,7 +94,7 @@ method_decl method_declarations
 //| Type Ident '=' literal SemiColon ;
 
 field_declaration returns [Node node]:
- Type Ident ';' field_declaration
+ Type Ident SemiColon field_declaration
  {
     $node = new Node("field_declaration");
 
@@ -104,7 +104,7 @@ field_declaration returns [Node node]:
     $node.addEdge($field_declaration.node);
 
  }
-| Type Ident'['int_literal']' ';' field_declaration
+| Type Ident'['int_literal']' SemiColon field_declaration
 {
     $node = new Node("field_declaration");
 
@@ -487,8 +487,8 @@ Num
     $node = new Node("int_literal");
     $node.addEdge(new Node($HexNum.text));
 }
-
 ;
+
 
 
 /////////////////////////////////////////////////////////////
