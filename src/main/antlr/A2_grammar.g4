@@ -70,14 +70,14 @@ prog
 };
 
 field_declarations returns [Node node]:
-field_decl field_declarations
+field_declaration field_declarations
 {
     $node = new Node("field_declarations");
-    $node.addEdge($field_decl.node);
-
+    $node.addEdge($field_declaration.node);
 }
 |
 ;
+
 method_declarations returns [Node node]:
 method_decl method_declarations
 {
@@ -93,27 +93,154 @@ method_decl method_declarations
 //| field_decl ( ',' Ident | Ident'['int_literal']') ';'
 //| Type Ident '=' literal SemiColon ;
 
-field_decl returns [Node node]:
- Type (Ident | Ident'['int_literal']') ';'
+field_declaration returns [Node node]:
+ Type Ident ';'
+ {
+    $node = new Node("field_declaration");
+    Node node1 = new Node($Type.text);
+    Node node2 = new Node($Ident.text);
+    Node node3 = new Node(";");
+
+    $node.addEdge(node1);
+    $node.addEdge(node2);
+    $node.addEdge(node3);
+
+ }
+| Type Ident'['int_literal']' ';'
+{
+    $node = new Node("field_declaration");
+    Node node1 = new Node($Type.text);
+    Node node2 = new Node($Ident.text);
+    Node node3 = new Node("[");
+    Node node4 = new Node("]");
+    Node node5 = new Node(";");
+
+    $node.addEdge(node1);
+    $node.addEdge(node2);
+    $node.addEdge(node3);
+    $node.addEdge($int_literal.node);
+    $node.addEdge(node4);
+    $node.addEdge(node5);
+
+}
 | Type Ident '=' literal SemiColon
-| Type (Ident | Ident'['int_literal']')
-| temp field_decl
-| (',' Ident| Ident'['int_literal']') SemiColon
+{
+    $node = new Node("field_declaration");
+    Node node1 = new Node($Type.text);
+    Node node2 = new Node($Ident.text);
+    Node node3 = new Node("=");
+    Node node4 = new Node(";");
+
+    $node.addEdge(node1);
+    $node.addEdge(node2);
+    $node.addEdge(node3);
+    $node.addEdge($literal.node);
+    $node.addEdge(node4);
+}
+| Type Ident
+{
+    $node = new Node("field_declaration");
+
+    Node node1 = new Node($Type.text);
+    Node node2 = new Node($Ident.text);
+    $node.addEdge(node1);
+    $node.addEdge(node2);
+}
+| Type Ident'['int_literal']'
+{
+    $node = new Node("field_declaration");
+
+    Node node1 = new Node($Type.text);
+    Node node2 = new Node($Ident.text);
+    Node node3 = new Node("[");
+    Node node4 = new Node("]");
+
+    $node.addEdge(node1);
+    $node.addEdge(node2);
+    $node.addEdge(node3);
+    $node.addEdge($int_literal.node);
+    $node.addEdge(node4);
+}
+| multi_declaration field_declaration
+{
+    $node = new Node("field_declaration");
+
+   $node.addEdge($multi_declaration.node);
+   $node.addEdge($field_declaration.node);
+}
+| (',' Ident ';')
+{
+    $node = new Node("field_declaration");
+
+    Node node1 = new Node(",");
+    Node node2 = new Node($Ident.text);
+    Node node3 = new Node(";");
+
+     $node.addEdge(node1);
+     $node.addEdge(node2);
+     $node.addEdge(node3);
+
+}
+| ',' Ident'['int_literal']' ';'
+{
+    $node = new Node("field_declaration");
+
+    Node node1 = new Node(",");
+    Node node2 = new Node($Ident.text);
+    Node node3 = new Node("[");
+    Node node4 = new Node("]");
+    Node node5 = new Node(";");
+
+    $node.addEdge(node1);
+    $node.addEdge(node2);
+    $node.addEdge(node3);
+    $node.addEdge($int_literal.node);
+    $node.addEdge(node4);
+    $node.addEdge(node5);
+}
 ;
-temp:
+
+//multi declaration
+multi_declaration returns [Node node]:
 ',' Ident
+{
+    $node = new Node("multi_declaration");
+    Node node1 = new Node(",");
+    Node node2 = new Node($Ident.text);
+    $node.addEdge(node1);
+    $node.addEdge(node2);
+}
 | Ident'['int_literal']'
+{
+    $node = new Node("multi_declaration");
+    Node node1 = new Node($Ident.text);
+    Node node2 = new Node("[");
+    Node node3 = new Node("]");
+    $node.addEdge(node1);
+    $node.addEdge(node2);
+    $node.addEdge($int_literal.node);
+    $node.addEdge(node3);
+}
 ;
 
 //method_decl
 //: (Type | 'void') Ident'('( (Type Ident) ( ','Type Ident)*)? ')'block;
 
 method_decl returns [Node node]
-: (Type | 'void') Ident'(' tempParam ')'block;
+: Type Ident'(' methodParam ')'block
+{
+    $node = new Node("method_decl");
 
-tempParam
+}
+| 'void' Ident'(' methodParam ')'block
+{
+    $node = new Node("method_decl");
+
+};
+
+methodParam
 : (Type Ident)
-| (Type Ident) tempParam
+| (Type Ident) methodParam
 | ( ','Type Ident)
 |
 ;
@@ -194,7 +321,7 @@ location
 : Ident
 | Ident '[' expr ']';
 
-literal
+literal returns [Node node]
 : int_literal
 | Char
 | BoolLit;
@@ -206,7 +333,7 @@ AssignOp|
 CondOp
 ;
 
-int_literal:
+int_literal returns [Node node]:
 Num |
 HexNum
 ;

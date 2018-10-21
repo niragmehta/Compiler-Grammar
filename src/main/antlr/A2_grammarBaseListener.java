@@ -54,25 +54,25 @@ public class A2_grammarBaseListener implements A2_grammarListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterField_decl(A2_grammarParser.Field_declContext ctx) { }
+	@Override public void enterField_declaration(A2_grammarParser.Field_declarationContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitField_decl(A2_grammarParser.Field_declContext ctx) { }
+	@Override public void exitField_declaration(A2_grammarParser.Field_declarationContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterTemp(A2_grammarParser.TempContext ctx) { }
+	@Override public void enterMulti_declaration(A2_grammarParser.Multi_declarationContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitTemp(A2_grammarParser.TempContext ctx) { }
+	@Override public void exitMulti_declaration(A2_grammarParser.Multi_declarationContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -90,13 +90,13 @@ public class A2_grammarBaseListener implements A2_grammarListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterTempParam(A2_grammarParser.TempParamContext ctx) { }
+	@Override public void enterMethodParam(A2_grammarParser.MethodParamContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitTempParam(A2_grammarParser.TempParamContext ctx) { }
+	@Override public void exitMethodParam(A2_grammarParser.MethodParamContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

@@ -1,11 +1,5 @@
 class Program {
-	int main() {
-		callout("printf", "hello world\n");
-		return 0;
-	}
-	int hello(int f, int c) {
+	int x = 9;
 
-	    int x;
-	    x = a + b + c + 4;
-	}
+	int abc(){}
 }
