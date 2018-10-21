@@ -97,31 +97,23 @@ field_declaration returns [Node node]:
  Type Ident ';' field_declaration
  {
     $node = new Node("field_declaration");
-    Node node1 = new Node($Type.text);
-    Node node2 = new Node($Ident.text);
-    Node node3 = new Node(";");
 
-    $node.addEdge(node1);
-    $node.addEdge(node2);
-    $node.addEdge(node3);
+    $node.addEdge(new Node($Type.text));
+    $node.addEdge(new Node($Ident.text));
+    $node.addEdge(new Node($SemiColon.text));
     $node.addEdge($field_declaration.node);
 
  }
 | Type Ident'['int_literal']' ';' field_declaration
 {
     $node = new Node("field_declaration");
-    Node node1 = new Node($Type.text);
-    Node node2 = new Node($Ident.text);
-    Node node3 = new Node("[");
-    Node node4 = new Node("]");
-    Node node5 = new Node(";");
 
-    $node.addEdge(node1);
-    $node.addEdge(node2);
-    $node.addEdge(node3);
+    $node.addEdge(new Node($Type.text));
+    $node.addEdge(new Node($Ident.text));
+    $node.addEdge(new Node("["));
     $node.addEdge($int_literal.node);
-    $node.addEdge(node4);
-    $node.addEdge(node5);
+    $node.addEdge(new Node("]"));
+    $node.addEdge(new Node($SemiColon.text));
     $node.addEdge($field_declaration.node);
 
 }
@@ -129,25 +121,19 @@ field_declaration returns [Node node]:
 {
     $node = new Node("field_declaration");
 
-    Node node1 = new Node($Type.text);
-    Node node2 = new Node($Ident.text);
-    Node node3 = new Node("=");
-    Node node4 = new Node(";");
-    $node.addEdge(node1);
-    $node.addEdge(node2);
-    $node.addEdge(node3);
+    $node.addEdge(new Node($Type.text));
+    $node.addEdge(new Node($Ident.text));
+    $node.addEdge(new Node("="));
     $node.addEdge($literal.node);
-    $node.addEdge(node4);
+    $node.addEdge(new Node($SemiColon.text));
     $node.addEdge($field_declaration.node);
 }
 | Type Ident multi_declaration SemiColon field_declaration
 {
     $node = new Node("field_declaration");
 
-    Node node1 = new Node($Type.text);
-    Node node2 = new Node($Ident.text);
-    $node.addEdge(node1);
-    $node.addEdge(node2);
+    $node.addEdge(new Node($Type.text));
+    $node.addEdge(new Node($Ident.text));
     $node.addEdge($multi_declaration.node);
     $node.addEdge(new Node(";"));
     $node.addEdge($field_declaration.node);
@@ -156,16 +142,11 @@ field_declaration returns [Node node]:
 {
     $node = new Node("field_declaration");
 
-    Node node1 = new Node($Type.text);
-    Node node2 = new Node($Ident.text);
-    Node node3 = new Node("[");
-    Node node4 = new Node("]");
-
-    $node.addEdge(node1);
-    $node.addEdge(node2);
-    $node.addEdge(node3);
+    $node.addEdge(new Node($Type.text));
+    $node.addEdge(new Node($Ident.text));
+    $node.addEdge(new Node("["));
     $node.addEdge($int_literal.node);
-    $node.addEdge(node4);
+    $node.addEdge(new Node("]"));
     $node.addEdge($multi_declaration.node);
     $node.addEdge(new Node(";"));
     $node.addEdge($field_declaration.node);
@@ -187,15 +168,11 @@ multi_declaration returns [Node node]:
 {
     $node = new Node("multi_declaration");
 
-    Node node1 = new Node($Ident.text);
-    Node node2 = new Node("[");
-    Node node3 = new Node("]");
-
     $node.addEdge(new Node(","));
-    $node.addEdge(node1);
-    $node.addEdge(node2);
+    $node.addEdge(new Node($Ident.text));
+    $node.addEdge(new Node("["));
     $node.addEdge($int_literal.node);
-    $node.addEdge(node3);
+    $node.addEdge(new Node("]"));
 }
 ;
 
