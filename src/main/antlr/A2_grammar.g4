@@ -231,43 +231,108 @@ method_decl returns [Node node]
 {
     $node = new Node("method_decl");
 
+    Node node1 = new Node($Type.text);
+    Node node2 = new Node($Ident.text);
+    Node node3 = new Node("(");
+    Node node4 = new Node(")");
+    $node.addEdge(node1);
+    $node.addEdge(node2);
+    $node.addEdge(node3);
+    $node.addEdge($methodParam.node);
+    $node.addEdge(node4);
+    $node.addEdge($block.node);
+
 }
-| 'void' Ident'(' methodParam ')'block
+| Void Ident'(' methodParam ')'block
 {
     $node = new Node("method_decl");
+    Node node1 = new Node($Void.text);
+    Node node2 = new Node("void");
+    Node node3 = new Node("(");
+    Node node4 = new Node(")");
+
+    $node.addEdge(node1);
+    $node.addEdge(node2);
+    $node.addEdge(node3);
+    $node.addEdge($methodParam.node);
+    $node.addEdge(node4);
+    $node.addEdge($block.node);
 
 };
 
-methodParam
-: (Type Ident)
+methodParam returns [Node node]
+:(Type Ident)
+{
+    $node = new Node("methodParam");
+    $node.addEdge(new Node($Type.text));
+    $node.addEdge(new Node($Ident.text));
+}
 | (Type Ident) methodParam
+{
+    $node = new Node("methodParam");
+    $node.addEdge(new Node($Type.text));
+    $node.addEdge(new Node($Ident.text));
+}
 | ( ','Type Ident)
+{
+    $node = new Node("methodParam");
+    $node.addEdge(new Node(","));
+    $node.addEdge(new Node($Type.text));
+    $node.addEdge(new Node($Ident.text));
+}
 |
 ;
 
 //block
 //: '{'var_decl* statement*'}';
 
-block
-: '{'var_decl_temp statements'}';
+block returns [Node node]
+: '{'multi_var_decl statements'}'
+{
+    $node = new Node("block");
+    $node.addEdge(new Node("{"));
+    $node.addEdge($multi_var_decl.node);
+    $node.addEdge($statements.node);
+    $node.addEdge(new Node("}"));
+};
 
-var_decl_temp:
-var_decl var_decl_temp
+multi_var_decl returns [Node node]
+:var_decl multi_var_decl
+{
+    $node = new Node("multi_var_decl");
+    $node.addEdge($var_decl.node);
+    $node.addEdge($multi_var_decl.node);
+}
 |
 ;
 
 //var_decl
 //: Type Ident(','Ident)* ';'
 
-var_decl
-: Type Ident var_decl_extra ';';
+var_decl returns [Node node]
+: Type Ident var_decl_extra ';'
+{
+    $node = new Node("multi_var_decl");
+    $node.addEdge(new Node($Type.text));
+    $node.addEdge(new Node($Ident.text));
+    $node.addEdge($var_decl_extra.node);
+    $node.addEdge(new Node(";"));
 
-var_decl_extra:
-','Ident var_decl_extra
+};
+
+var_decl_extra returns [Node node]
+:','Ident var_decl_extra
+{
+    $node = new Node("var_decl_extra");
+
+    $node.addEdge(new Node(","));
+    $node.addEdge(new Node($Ident.text));
+    $node.addEdge($var_decl_extra.node);
+}
 |
 ;
 
-statement
+statement returns [Node node]
 : location ('='|'+='|'-=') expr SemiColon
 | method_call';'
 | 'if' OParen'expr' CParen block ('else' block  )?
@@ -278,46 +343,92 @@ statement
 | 'continue' SemiColon
 | block;
 
-statements:
-statement statements
+statements returns [Node node]
+:statement statements
+{
+    $node = new Node("statements");
+    $node.addEdge($statement.node);
+    $node.addEdge($statements.node);
+}
 |
 ;
 
-expr
+expr returns [Node node]
 : location
+{
+   $node = new Node("expr");
+   $node.addEdge($expr.node);
+}
 | method_call
+{
+   $node = new Node("expr");
+   $node.addEdge($method_call.node);
+}
 | literal
+{
+   $node = new Node("expr");
+   $node.addEdge($literal.node);
+}
 | expr binOp expr
+{
+   $node = new Node("expr");
+   $node.addEdge($expr.node);
+   $node.addEdge($binOp.node);
+   $node.addEdge($expr.node);
+}
 | '-' expr
+{
+   $node = new Node("expr");
+   $node.addEdge(new Node("-"));
+   $node.addEdge($expr.node);
+}
 | '!' expr
-| '(' expr ')';
+{
+   $node = new Node("expr");
+   $node.addEdge(new Node("!"));
+   $node.addEdge($expr.node);
+}
+| '(' expr ')'
+{
+   $node = new Node("expr");
+   $node.addEdge(new Node("("));
+   $node.addEdge($expr.node);
+   $node.addEdge(new Node(")"));
+};
 
 //method_call
 //: method_name '(' (expr ( ',' expr )*)? ')'
 //| Callout '(' Str ( ',' callout_arg )* ')';
 
-method_call
+method_call returns [Node node]
 : method_name '(' (expr methodArgs)? ')'
-| Callout '(' Str calloutArgs ')';
+{
+    $node = new Node("method_call");
 
-methodArgs:
-( ',' expr ) methodArgs
+}
+| Callout '(' Str calloutArgs ')'
+{
+    $node = new Node("method_call");
+};
+
+methodArgs returns [Node node]
+:( ',' expr ) methodArgs
 |
 ;
 
-calloutArgs:
-( ',' callout_arg ) calloutArgs
+calloutArgs returns [Node node]
+:( ',' callout_arg ) calloutArgs
 |
 ;
 
-callout_arg
+callout_arg returns [Node node]
 : expr
 | Str;
 
-method_name
+method_name returns [Node node]
 : Ident;
 
-location
+location returns [Node node]
 : Ident
 | Ident '[' expr ']';
 
@@ -326,7 +437,7 @@ literal returns [Node node]
 | Char
 | BoolLit;
 
-binOp:
+binOp returns [Node node]:
 ArithOp |
 Relop |
 AssignOp|
@@ -338,6 +449,8 @@ Num |
 HexNum
 ;
 
+
+/////////////////////////////////////////////////////////////
 //Everything below this is lexer grammar
 /////////////////////////////////////////////////////////////
 

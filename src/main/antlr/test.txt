@@ -1,5 +1,13 @@
 class Program {
 	int x = 9;
 
-	int abc(){}
+	int abc(int a)
+	{
+	    if(x == 9)
+        	{
+        	    x=5;
+        	}
+	}
+
+
 }
