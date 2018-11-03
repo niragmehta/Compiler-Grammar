@@ -24,7 +24,7 @@ public class Graph {
         return root;
     }
 
-};
+}
 
 public class Node {
 
@@ -84,12 +84,9 @@ public class Node {
         System.out.print(")\n");
     }
 
-};
-
 }
 
-//prog
-//:'class Program {'field_decl* method_decl*'}';
+}
 
 prog
 :'class' 'Program' '{' field_declaration method_declarations'}'
@@ -266,9 +263,6 @@ block returns [Node node]
     $node.addEdge($var_decl.node);
     $node.addEdge($statements.node);
 };
-
-//var_decl
-//: Type Ident(','Ident)* ';'
 
 var_decl returns [Node node]
 : Type Ident var_decl_extra ';'
