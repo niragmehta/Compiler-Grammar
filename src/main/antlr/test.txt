@@ -1,4 +1,15 @@
+
 class Program {
+
+    int a , b;
+
+    void abc(){}
+
+    boolean cde(int a,int b)
+    {
+    }
+
+
 	int main () {
 		callout("printf", "hello world\n");
 		return 0;
