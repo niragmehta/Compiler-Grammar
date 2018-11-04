@@ -24,6 +24,7 @@ public static class Symbol
     public Types type;
     public Scope scope;
 
+    public static List<Symbol> list = new ArrayList();
 
     public Symbol()
     {
@@ -39,6 +40,11 @@ public static class Symbol
         System.out.println(id+","+tabid+","+name+","+type+","+scope+","+isArray+","+isInited+","+arrSize);
     }
 
+    public static void addSymbol(Symbol symbol)
+    {
+        list.add(symbol);
+    }
+
 //    public union initVal {
 //    	int i;
 //    	boolean b;
@@ -49,6 +55,7 @@ public static class Symtables
 {
     public static int idCounter = 0;
     public static Stack<Symtables> stack = new Stack();
+    public static List<Symtables> list = new ArrayList();
 
     public int id;
     public int parentId;
@@ -66,9 +73,50 @@ public static class Symtables
         symbols.add(symbol);
     }
 
+    public static void addSymTableToList(Symtables symtable)
+    {
+        list.add(symtable);
+    }
+
     public void print()
     {
         System.out.println(id+","+parentId);
+    }
+
+}
+public static class Csv
+{
+    public static void createSymbols() throws IOException
+    {
+        FileWriter writer = new FileWriter("symbols.csv");
+        List<Symbol> list = Symbol.list;
+        writer.append("id"+","+"tabid"+","+"name"+","+"type"+","+"scope"+","+"isArray"+","+"isInited"+","+"arrSize\n");
+        for(int i=0;i<list.size();i++)
+        {
+            writer.append(list.get(i).id+",");
+            writer.append(list.get(i).tabid+",");
+            writer.append(list.get(i).name+",");
+            writer.append(list.get(i).type+",");
+            writer.append(list.get(i).scope+",");
+            writer.append(list.get(i).isArray+",");
+            writer.append(list.get(i).isInited+",");
+            writer.append(list.get(i).arrSize+"\n");
+        }
+        writer.flush();
+        writer.close();
+    }
+    public static void createSymTable() throws IOException
+    {
+        FileWriter writer = new FileWriter("symtables.csv");
+        List<Symtables> list = Symtables.list;
+        writer.append("id"+","+"parent\n");
+        for(int i=0;i<list.size();i++)
+        {
+            writer.append(list.get(i).id+",");
+            writer.append(list.get(i).parentId+"\n");
+        }
+        writer.flush();
+        writer.close();
     }
 
 }
@@ -77,10 +125,12 @@ public static class Symtables
 
 prog returns [Symtables symtable]
 : Class Program
-{ $symtable = new Symtables(); Symtables.stack.push($symtable); }
+{ $symtable = new Symtables(); Symtables.stack.push($symtable); Symtables.addSymTableToList($symtable);}
 '{' field_decls method_decls '}'
 {
     Symtables.stack.pop();
+    try{Csv.createSymbols(); Csv.createSymTable();}
+    catch(Exception e){}
 }
 ;
 
@@ -99,6 +149,8 @@ field_decl returns [Symbol symbol]
     $symbol.type=Symbol.multiType;
     $symbol.scope=Scope.GLOBAL;
     Symtables.stack.peek().add($symbol);
+
+    Symbol.addSymbol($symbol);
 }
 | field_decl ',' Ident '[' num ']'
 {
@@ -112,6 +164,7 @@ field_decl returns [Symbol symbol]
     $symbol.arrSize=$num.text;
 
     Symtables.stack.peek().add($symbol);
+    Symbol.addSymbol($symbol);
 }
 | Type Ident
 {
@@ -135,6 +188,7 @@ field_decl returns [Symbol symbol]
     $symbol.scope=Scope.GLOBAL;
 
     Symtables.stack.peek().add($symbol);
+    Symbol.addSymbol($symbol);
 }
 | Type Ident '[' num ']'
 {
@@ -159,6 +213,7 @@ field_decl returns [Symbol symbol]
     $symbol.arrSize=$num.text;
 
     Symtables.stack.peek().add($symbol);
+    Symbol.addSymbol($symbol);
 }
 ;
 
@@ -183,6 +238,7 @@ inited_field_decl returns [Symbol symbol]
     $symbol.scope=Scope.GLOBAL;
 
     Symtables.stack.peek().add($symbol);
+    Symbol.addSymbol($symbol);
 }
 ;
 
@@ -197,11 +253,15 @@ method_decl returns [Symbol symbol]
                  $symbol.tabid = Symtables.stack.peek().id;
                  $symbol.name = $Ident.text;
                  $symbol.type=Types.VOID;
+                 $symbol.scope = Scope.GLOBAL;
                  Symtables.stack.peek().add($symbol);
 
                  Symtables symtable = new Symtables();
                  symtable.parentId=Symtables.stack.peek().id;
                  Symtables.stack.push(symtable);
+
+                 Symbol.addSymbol($symbol);
+                 Symtables.addSymTableToList(symtable);
 
              }
 '(' params ')' '{' var_decls statements '}'
@@ -213,6 +273,7 @@ method_decl returns [Symbol symbol]
      $symbol = new Symbol();
      $symbol.tabid = Symtables.stack.peek().id;
      $symbol.name = $Ident.text;
+     $symbol.scope = Scope.GLOBAL;
 
      if($Type.text.equals("int")){
         $symbol.type=Types.INT;
@@ -228,6 +289,9 @@ method_decl returns [Symbol symbol]
      Symtables symtable = new Symtables();
      symtable.parentId=Symtables.stack.peek().id;
      Symtables.stack.push(symtable);
+
+     Symbol.addSymbol($symbol);
+     Symtables.addSymTableToList(symtable);
 
 }
 '(' params ')' '{' var_decls statements '}' {Symtables.stack.pop();}
@@ -255,6 +319,7 @@ params returns [Symbol symbol]
 
     $symbol.scope=Scope.LOCAL;
     Symtables.stack.peek().add($symbol);
+    Symbol.addSymbol($symbol);
 
 }
 |
@@ -269,6 +334,7 @@ nextParams returns [Symbol symbol]
     $symbol.type=Symbol.multiType;
     $symbol.scope=Scope.LOCAL;
     Symtables.stack.peek().add($symbol);
+    Symbol.addSymbol($symbol);
 
 }
 |
@@ -277,7 +343,9 @@ nextParams returns [Symbol symbol]
 block returns [Symtables symtable]
 : '{' {      Symtables symtable = new Symtables();
              symtable.parentId=Symtables.stack.peek().id;
-             Symtables.stack.push(symtable);}
+             Symtables.stack.push(symtable);
+             Symtables.addSymTableToList(symtable);
+             }
  var_decls statements '}'
  { Symtables.stack.pop(); }
 ;
@@ -288,8 +356,23 @@ var_decls
 ;
 
 
-var_decl
+var_decl returns [Symbol symbol]
 : Type Ident ';'
+{
+    $symbol = new Symbol();
+    $symbol.tabid = Symtables.stack.peek().id;
+    $symbol.name = $Ident.text;
+    if($Type.text.equals("int"))
+        $symbol.type=Types.INT;
+    else if($Type.text.equals("boolean"))
+        $symbol.type=Types.BOOL;
+    else
+        $symbol.type=Types.INVALID;
+
+    $symbol.scope=Scope.LOCAL;
+    Symtables.stack.peek().add($symbol);
+    Symbol.addSymbol($symbol);
+}
 ;
 
 statements
