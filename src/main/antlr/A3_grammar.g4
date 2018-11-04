@@ -9,6 +9,7 @@ import java.util.*;
 
 public enum Types {INT, CHAR, BOOL, STR, VOID, LABEL, INVALID}; //symbol type
 public enum Scope {GLOBAL, LOCAL, CONST, INVALID}; //symbol scope
+enum opcode {ADD, SUB, MUL, DIV, NEG, READ, WRITE, ASSIGN, GOTO, LT, GT, LE, GE, EQ, NE, PARAM, CALL, RET, LABEL};
 
 public static class Symbol
 {
@@ -34,10 +35,6 @@ public static class Symbol
         isArray=false;
         isInited=false;
         arrSize="0";
-    }
-    public void print()
-    {
-        System.out.println(id+","+tabid+","+name+","+type+","+scope+","+isArray+","+isInited+","+arrSize);
     }
 
     public static void addSymbol(Symbol symbol)
@@ -78,12 +75,24 @@ public static class Symtables
         list.add(symtable);
     }
 
-    public void print()
-    {
-        System.out.println(id+","+parentId);
+}
+public static class instructions
+{
+    public int id;
+    public int res;
+    public enum opc;
+    public int op1;
+    public int op2;
+
+    public static int idCounter = 0;
+    public static List<instructions> list = new ArrayList();
+
+    intructions(){
+        id=++idCounter;
     }
 
 }
+
 public static class Csv
 {
     public static void createSymbols() throws IOException
@@ -422,18 +431,22 @@ calloutArgs
 ;
 
 
-expr
+expr returns [Instruction instruction]
 : literal
 | location
 | '(' expr ')'
 | SubOp expr
 | '!' expr
-| expr AddOp expr
-| expr MulDiv expr
-| expr SubOp expr
-| expr RelOp expr
-| expr AndOp expr
-| expr OrOp expr
+| e1=expr AddOp e2=expr
+{
+    $instruction = new Instruction();
+
+}
+| e1=expr MulDiv e2=expr
+| e1=expr SubOp e2=expr
+| e1=expr RelOp e2=expr
+| e1=expr AndOp e2=expr
+| e1=expr OrOp e2=expr
 | methodCall
 ;
 
