@@ -9,7 +9,7 @@ import java.util.*;
 
 public enum Types {INT, CHAR, BOOL, STR, VOID, LABEL, INVALID}; //symbol type
 public enum Scope {GLOBAL, LOCAL, CONST, INVALID}; //symbol scope
-enum opcode {ADD, SUB, MUL, DIV, NEG, READ, WRITE, ASSIGN, GOTO, LT, GT, LE, GE, EQ, NE, PARAM, CALL, RET, LABEL};
+public enum Opcode {ADD, SUB, MUL, DIV, NEG, READ, AND, OR, WRITE, ASSIGN, GOTO, LT, GT, LE, GE, EQ, NE, PARAM, CALL, RET, LABEL};
 
 public static class Symbol
 {
@@ -76,18 +76,18 @@ public static class Symtables
     }
 
 }
-public static class instructions
+public static class Instructions
 {
     public int id;
     public int res;
-    public enum opc;
+    public Opcode opc;
     public int op1;
     public int op2;
 
     public static int idCounter = 0;
-    public static List<instructions> list = new ArrayList();
+    public static List<Instructions> list = new ArrayList();
 
-    intructions(){
+    Instructions(){
         id=++idCounter;
     }
 
@@ -127,6 +127,22 @@ public static class Csv
         writer.flush();
         writer.close();
     }
+    public static void createInstructionsTable() throws IOException
+    {
+        FileWriter writer = new FileWriter("instructions.csv");
+        List<Instructions> list = Instructions.list;
+        writer.append("id"+","+"res"+","+"opcode"+","+"op1"+","+"op2\n");
+        for(int i=0;i<list.size();i++)
+        {
+            writer.append(list.get(i).id+",");
+            writer.append(list.get(i).res+",");
+            writer.append(list.get(i).opc+",");
+            writer.append(list.get(i).op1+",");
+            writer.append(list.get(i).op2+"\n");
+        }
+        writer.flush();
+        writer.close();
+    }
 
 }
 
@@ -138,7 +154,7 @@ prog returns [Symtables symtable]
 '{' field_decls method_decls '}'
 {
     Symtables.stack.pop();
-    try{Csv.createSymbols(); Csv.createSymTable();}
+    try{Csv.createSymbols(); Csv.createSymTable(); Csv.createInstructionsTable();}
     catch(Exception e){}
 }
 ;
@@ -263,8 +279,8 @@ method_decl returns [Symbol symbol]
                  $symbol.name = $Ident.text;
                  $symbol.type=Types.VOID;
                  $symbol.scope = Scope.GLOBAL;
-                 Symtables.stack.peek().add($symbol);
 
+                 Symtables.stack.peek().add($symbol);
                  Symtables symtable = new Symtables();
                  symtable.parentId=Symtables.stack.peek().id;
                  Symtables.stack.push(symtable);
@@ -389,8 +405,18 @@ statements
 |
 ;
 
-statement
+statement returns [Instructions instruction]
 : location eqOp expr ';'
+{
+    $instruction = new Instructions();
+    $instruction.op1 = $expr.symbol.id;
+    $instruction.op2 = -1;
+    $instruction.opc = Opcode.ASSIGN;
+    $instruction.res = $location.symbol.id;
+
+    Instructions.list.add($instruction);
+
+}
 | If '(' expr ')' block
 | If '(' expr ')' block Else block
 | While '(' expr ')' statement 
@@ -431,27 +457,169 @@ calloutArgs
 ;
 
 
-expr returns [Instruction instruction]
+expr returns [Symbol symbol]
 : literal
 | location
-| '(' expr ')'
+{ $symbol = $location.symbol; }
+| '(' expr ')' { $symbol = $expr.symbol; }
 | SubOp expr
+{
+   $symbol = new Symbol();
+   Instructions instruction = new Instructions();
+
+   instruction.res = $symbol.id;
+   instruction.op1 = -1;
+   instruction.op2 = $expr.symbol.id;
+   instruction.opc = Opcode.SUB;
+
+   Instructions.list.add(instruction);
+   Symtables.stack.peek().add($symbol);
+   Symbol.addSymbol($symbol);
+}
 | '!' expr
+{
+   $symbol = new Symbol();
+   Instructions instruction = new Instructions();
+
+   instruction.res = $symbol.id;
+   instruction.op1 = -1;
+   instruction.op2 = $expr.symbol.id;
+   instruction.opc = Opcode.NEG;
+
+   Instructions.list.add(instruction);
+   Symtables.stack.peek().add($symbol);
+   Symbol.addSymbol($symbol);
+}
 | e1=expr AddOp e2=expr
 {
-    $instruction = new Instruction();
+   $symbol = new Symbol();
+   Instructions instruction = new Instructions();
 
+   instruction.res = $symbol.id;
+   instruction.op1 = $e1.symbol.id;
+   instruction.op2 = $e2.symbol.id;
+   instruction.opc = Opcode.ADD;
+
+   Instructions.list.add(instruction);
+   Symtables.stack.peek().add($symbol);
+   Symbol.addSymbol($symbol);
 }
 | e1=expr MulDiv e2=expr
+{
+   $symbol = new Symbol();
+   Instructions instruction = new Instructions();
+
+   instruction.res = $symbol.id;
+   instruction.op1 = $e1.symbol.id;
+   instruction.op2 = $e2.symbol.id;
+
+   if($MulDiv.text.equals("*"))
+    instruction.opc = Opcode.MUL;
+   else
+    instruction.opc = Opcode.DIV;
+
+   Instructions.list.add(instruction);
+   Symtables.stack.peek().add($symbol);
+   Symbol.addSymbol($symbol);
+
+}
 | e1=expr SubOp e2=expr
+{
+   $symbol = new Symbol();
+   Instructions instruction = new Instructions();
+
+   instruction.res = $symbol.id;
+   instruction.op1 = $e1.symbol.id;
+   instruction.op2 = $e2.symbol.id;
+   instruction.opc = Opcode.SUB;
+
+   Instructions.list.add(instruction);
+   Symtables.stack.peek().add($symbol);
+   Symbol.addSymbol($symbol);
+}
 | e1=expr RelOp e2=expr
+{
+   $symbol = new Symbol();
+   Instructions instruction = new Instructions();
+
+   instruction.res = $symbol.id;
+   instruction.op1 = $e1.symbol.id;
+   instruction.op2 = $e2.symbol.id;
+
+   if($MulDiv.text.equals("<="))
+        instruction.opc = Opcode.LE;
+   if($MulDiv.text.equals(">="))
+        instruction.opc = Opcode.GE;
+    if($MulDiv.text.equals("<"))
+        instruction.opc = Opcode.LT;
+    if($MulDiv.text.equals(">"))
+        instruction.opc = Opcode.GT;
+
+   Instructions.list.add(instruction);
+   Symtables.stack.peek().add($symbol);
+   Symbol.addSymbol($symbol);
+}
 | e1=expr AndOp e2=expr
+{
+   $symbol = new Symbol();
+   Instructions instruction = new Instructions();
+
+   instruction.res = $symbol.id;
+   instruction.op1 = $e1.symbol.id;
+   instruction.op2 = $e2.symbol.id;
+   instruction.opc = Opcode.AND;
+
+   Instructions.list.add(instruction);
+   Symtables.stack.peek().add($symbol);
+   Symbol.addSymbol($symbol);
+
+}
 | e1=expr OrOp e2=expr
+{
+   $symbol = new Symbol();
+   Instructions instruction = new Instructions();
+
+   instruction.res = $symbol.id;
+   instruction.op1 = $e1.symbol.id;
+   instruction.op2 = $e2.symbol.id;
+   instruction.opc = Opcode.OR;
+
+   Instructions.list.add(instruction);
+   Symtables.stack.peek().add($symbol);
+   Symbol.addSymbol($symbol);
+
+}
 | methodCall
 ;
 
-location
+location returns [Symbol symbol]
 :Ident
+{
+    int flag=0;
+    Symtables table = Symtables.stack.peek();
+    for(int i=0;i<table.symbols.size();i++)
+    {
+        if(table.symbols.get(i).name.equals($Ident.text))
+        {
+            $symbol=table.symbols.get(i);
+            flag=1;
+            break;
+        }
+    }
+    if(flag==0)
+    {
+        Symtables table2 = Symtables.list.get(0);
+        for(int i=0;i<table2.symbols.size();i++)
+        {
+            if(table2.symbols.get(i).name.equals($Ident.text))
+            {
+                $symbol=table2.symbols.get(i);
+                break;
+            }
+        }
+    }
+
+}
 | Ident '[' expr ']'
 ;
 
