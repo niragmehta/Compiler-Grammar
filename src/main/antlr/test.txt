@@ -1,17 +1,14 @@
 
 class Program {
 
-    int a , b;
-
-    void abc(){
-
+    int a[10];
+    int abc()
+    {
+        int b ;
         int c;
         int d;
-        int e;
-
-        a = b + ( c / (d*e));
+        a[7]=b;
     }
-
 
 	int main () {
 		callout("printf", "hello world\n");

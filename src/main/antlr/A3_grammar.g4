@@ -35,6 +35,9 @@ public static class Symbol
         isArray=false;
         isInited=false;
         arrSize="0";
+
+        scope=Scope.LOCAL;
+
     }
 
     public static void addSymbol(Symbol symbol)
@@ -90,6 +93,9 @@ public static class Instructions
     Instructions(){
         id=++idCounter;
     }
+
+    public static boolean arrayRead = true;
+    public static String arrayAccess = "8";
 
 }
 
@@ -406,13 +412,27 @@ statements
 ;
 
 statement returns [Instructions instruction]
-: location eqOp expr ';'
+: {Instructions.arrayRead = false;}location eqOp expr ';'
 {
     $instruction = new Instructions();
-    $instruction.op1 = $expr.symbol.id;
-    $instruction.op2 = -1;
-    $instruction.opc = Opcode.ASSIGN;
-    $instruction.res = $location.symbol.id;
+
+    if($location.symbol.isArray)
+    {
+        $instruction.opc = Opcode.WRITE;
+        int offset = 8;
+        try{offset = Integer.parseInt(Instructions.arrayAccess); offset*=8;}
+        catch(Exception e){}
+        $instruction.op1 = offset;
+        $instruction.op2 = $expr.symbol.id;
+        $instruction.res = $location.symbol.id;
+    }
+    else
+    {
+        $instruction.op1 = $expr.symbol.id;
+        $instruction.op2 = -1;
+        $instruction.opc = Opcode.ASSIGN;
+        $instruction.res = $location.symbol.id;
+    }
 
     Instructions.list.add($instruction);
 
@@ -458,13 +478,13 @@ calloutArgs
 
 
 expr returns [Symbol symbol]
-: literal
-| location
-{ $symbol = $location.symbol; }
+: literal {$symbol = new Symbol(); $symbol.name = $literal.string;}
+| location {$symbol = $location.symbol; }
 | '(' expr ')' { $symbol = $expr.symbol; }
 | SubOp expr
 {
    $symbol = new Symbol();
+   $symbol.tabid = Symtables.stack.peek().id;
    Instructions instruction = new Instructions();
 
    instruction.res = $symbol.id;
@@ -479,6 +499,7 @@ expr returns [Symbol symbol]
 | '!' expr
 {
    $symbol = new Symbol();
+   $symbol.tabid = Symtables.stack.peek().id;
    Instructions instruction = new Instructions();
 
    instruction.res = $symbol.id;
@@ -493,6 +514,7 @@ expr returns [Symbol symbol]
 | e1=expr AddOp e2=expr
 {
    $symbol = new Symbol();
+   $symbol.tabid = Symtables.stack.peek().id;
    Instructions instruction = new Instructions();
 
    instruction.res = $symbol.id;
@@ -507,6 +529,7 @@ expr returns [Symbol symbol]
 | e1=expr MulDiv e2=expr
 {
    $symbol = new Symbol();
+   $symbol.tabid = Symtables.stack.peek().id;
    Instructions instruction = new Instructions();
 
    instruction.res = $symbol.id;
@@ -526,6 +549,7 @@ expr returns [Symbol symbol]
 | e1=expr SubOp e2=expr
 {
    $symbol = new Symbol();
+   $symbol.tabid = Symtables.stack.peek().id;
    Instructions instruction = new Instructions();
 
    instruction.res = $symbol.id;
@@ -540,6 +564,7 @@ expr returns [Symbol symbol]
 | e1=expr RelOp e2=expr
 {
    $symbol = new Symbol();
+   $symbol.tabid = Symtables.stack.peek().id;
    Instructions instruction = new Instructions();
 
    instruction.res = $symbol.id;
@@ -562,6 +587,7 @@ expr returns [Symbol symbol]
 | e1=expr AndOp e2=expr
 {
    $symbol = new Symbol();
+   $symbol.tabid = Symtables.stack.peek().id;
    Instructions instruction = new Instructions();
 
    instruction.res = $symbol.id;
@@ -577,6 +603,7 @@ expr returns [Symbol symbol]
 | e1=expr OrOp e2=expr
 {
    $symbol = new Symbol();
+   $symbol.tabid = Symtables.stack.peek().id;
    Instructions instruction = new Instructions();
 
    instruction.res = $symbol.id;
@@ -619,20 +646,71 @@ location returns [Symbol symbol]
         }
     }
 
+    Instructions.arrayRead=true;
+
 }
 | Ident '[' expr ']'
+{
+    int flag=0;
+    Instructions.arrayAccess = $expr.symbol.name;
+    Symtables table = Symtables.stack.peek();
+    for(int i=0;i<table.symbols.size();i++)
+    {
+        if(table.symbols.get(i).name.equals($Ident.text))
+        {
+            $symbol=table.symbols.get(i);
+            flag=1;
+            break;
+        }
+    }
+    if(flag==0)
+    {
+        Symtables table2 = Symtables.list.get(0);
+        for(int i=0;i<table2.symbols.size();i++)
+        {
+            if(table2.symbols.get(i).name.equals($Ident.text))
+            {
+                $symbol=table2.symbols.get(i);
+                break;
+            }
+        }
+    }
+
+    Instructions instruction = new Instructions();
+
+    if(Instructions.arrayRead)
+    {
+        Symbol symbolTemp = new Symbol();
+        symbolTemp.tabid = Symtables.stack.peek().id;
+        instruction.opc = Opcode.READ;
+        int offset=8;
+        try{offset = Integer.parseInt($expr.symbol.name); offset*=8;}
+        catch(Exception e){}
+        instruction.op1 = $symbol.id;
+        instruction.op2 = offset;
+        instruction.res = symbolTemp.id;
+
+        $symbol = symbolTemp;
+        Symtables.stack.peek().add($symbol);
+        Symbol.addSymbol($symbol);
+    }
+
+    Instructions.list.add(instruction);
+    Instructions.arrayRead=true;
+
+}
 ;
 
 
-num
-: DecNum
-| HexNum
+num returns [String string]
+: DecNum {$string = $DecNum.text;}
+| HexNum {$string = $HexNum.text;}
 ;
 
-literal
-: num
-| Char
-| BoolLit
+literal returns[String string]
+: num{$string = $num.string;}
+| Char {$string=$Char.text;}
+| BoolLit {$string=$BoolLit.text;}
 ;
 
 eqOp
