@@ -4,9 +4,7 @@ class Program {
     int a[10];
     int abc()
     {
-        int b ;
-        int c;
-        int d;
+        int b, c, d ;
         a[7]=b;
     }
 

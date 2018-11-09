@@ -295,7 +295,7 @@ method_decl returns [Symbol symbol]
                  Symtables.addSymTableToList(symtable);
 
              }
-'(' params ')' '{' var_decls statements '}'
+'(' params ')' '{' var_decl statements '}'
 {
     Symtables.stack.pop();
 }
@@ -325,7 +325,7 @@ method_decl returns [Symbol symbol]
      Symtables.addSymTableToList(symtable);
 
 }
-'(' params ')' '{' var_decls statements '}' {Symtables.stack.pop();}
+'(' params ')' '{' var_decl statements '}' {Symtables.stack.pop();}
 ;
 
 
@@ -376,35 +376,76 @@ block returns [Symtables symtable]
              symtable.parentId=Symtables.stack.peek().id;
              Symtables.stack.push(symtable);
              Symtables.addSymTableToList(symtable);
-             }
- var_decls statements '}'
+      }
+ var_decl statements '}'
  { Symtables.stack.pop(); }
 ;
 
-var_decls
-: var_decls var_decl 
-| 
-;
-
+//var_decls
+//: var_decls var_decl
+//|
+//;
 
 var_decl returns [Symbol symbol]
-: Type Ident ';'
+: Type Ident var_decl_extra ';' var_decl
 {
     $symbol = new Symbol();
     $symbol.tabid = Symtables.stack.peek().id;
     $symbol.name = $Ident.text;
-    if($Type.text.equals("int"))
-        $symbol.type=Types.INT;
-    else if($Type.text.equals("boolean"))
-        $symbol.type=Types.BOOL;
-    else
-        $symbol.type=Types.INVALID;
 
-    $symbol.scope=Scope.LOCAL;
+    if($Type.text.equals("int")){
+        $symbol.type=Types.INT;
+        Symbol.multiType = Types.INT;
+        }
+    else if($Type.text.equals("boolean")){
+        $symbol.type=Types.BOOL;
+        Symbol.multiType = Types.BOOL;
+        }
+    else{
+        $symbol.type=Types.INVALID;
+        Symbol.multiType = Types.INVALID;
+        }
+
+    Symtables.stack.peek().add($symbol);
+    Symbol.addSymbol($symbol);
+
+}
+|
+;
+
+var_decl_extra returns [Symbol symbol]
+:',' Ident var_decl_extra
+{
+    $symbol = new Symbol();
+    $symbol.name = $Ident.text;
+    $symbol.tabid = Symtables.stack.peek().id;
+    $symbol.type = Symbol.multiType;
+
     Symtables.stack.peek().add($symbol);
     Symbol.addSymbol($symbol);
 }
+|
 ;
+
+
+//var_decl returns [Symbol symbol]
+//: Type Ident ';'
+//{
+//    $symbol = new Symbol();
+//    $symbol.tabid = Symtables.stack.peek().id;
+//    $symbol.name = $Ident.text;
+//    if($Type.text.equals("int"))
+//        $symbol.type=Types.INT;
+//    else if($Type.text.equals("boolean"))
+//        $symbol.type=Types.BOOL;
+//    else
+//        $symbol.type=Types.INVALID;
+//
+//    $symbol.scope=Scope.LOCAL;
+//    Symtables.stack.peek().add($symbol);
+//    Symbol.addSymbol($symbol);
+//}
+//;
 
 statements
 : statement statements
