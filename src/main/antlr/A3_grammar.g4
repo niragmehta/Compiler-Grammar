@@ -427,33 +427,14 @@ var_decl_extra returns [Symbol symbol]
 |
 ;
 
-
-//var_decl returns [Symbol symbol]
-//: Type Ident ';'
-//{
-//    $symbol = new Symbol();
-//    $symbol.tabid = Symtables.stack.peek().id;
-//    $symbol.name = $Ident.text;
-//    if($Type.text.equals("int"))
-//        $symbol.type=Types.INT;
-//    else if($Type.text.equals("boolean"))
-//        $symbol.type=Types.BOOL;
-//    else
-//        $symbol.type=Types.INVALID;
-//
-//    $symbol.scope=Scope.LOCAL;
-//    Symtables.stack.peek().add($symbol);
-//    Symbol.addSymbol($symbol);
-//}
-//;
-
 statements
 : statement statements
 |
 ;
 
 statement returns [Instructions instruction]
-: {Instructions.arrayRead = false;}location eqOp expr ';'
+: {Instructions.arrayRead = false;}
+location eqOp expr ';'
 {
     $instruction = new Instructions();
 
@@ -625,7 +606,7 @@ expr returns [Symbol symbol]
    Symtables.stack.peek().add($symbol);
    Symbol.addSymbol($symbol);
 }
-| e1=expr AndOp e2=expr
+| e1=expr AndOp m e2=expr
 {
    $symbol = new Symbol();
    $symbol.tabid = Symtables.stack.peek().id;
@@ -641,8 +622,9 @@ expr returns [Symbol symbol]
    Symbol.addSymbol($symbol);
 
 }
-| e1=expr OrOp e2=expr
+| e1=expr OrOp m e2=expr
 {
+
    $symbol = new Symbol();
    $symbol.tabid = Symtables.stack.peek().id;
    Instructions instruction = new Instructions();
@@ -692,6 +674,7 @@ location returns [Symbol symbol]
 }
 | Ident '[' expr ']'
 {
+    //first find corresponding symbol
     int flag=0;
     Instructions.arrayAccess = $expr.symbol.name;
     Symtables table = Symtables.stack.peek();
@@ -742,6 +725,16 @@ location returns [Symbol symbol]
 }
 ;
 
+m returns [Symbol symbol]:
+{
+    $symbol = new Symbol();
+    $symbol.type = Types.LABEL;
+    Symtables.stack.peek().add($symbol);
+    Symbol.addSymbol($symbol);
+
+
+}
+;
 
 num returns [String string]
 : DecNum {$string = $DecNum.text;}
