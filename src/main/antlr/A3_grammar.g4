@@ -26,6 +26,9 @@ public static class Symbol
     public Types type;
     public Scope scope;
 
+    int i;
+    boolean b;
+
     public List<Instructions> truelist;
     public List<Instructions> falselist;
 
@@ -50,10 +53,6 @@ public static class Symbol
         list.add(symbol);
     }
 
-//    public union initVal {
-//    	int i;
-//    	boolean b;
-//    } in; //initial value, if applicable
 }
 
 public static class Symtables
@@ -119,7 +118,7 @@ public static class Csv
     {
         FileWriter writer = new FileWriter("symbols.csv");
         List<Symbol> list = Symbol.list;
-        writer.append("id"+","+"tabid"+","+"name"+","+"type"+","+"scope"+","+"isArray"+","+"isInited"+","+"arrSize\n");
+        writer.append("id"+","+"tabid"+","+"name"+","+"type"+","+"scope"+","+"isArray"+","+"isInited"+","+"arrSize"+","+"int val"+","+"bool val\n");
         for(int i=0;i<list.size();i++)
         {
             writer.append(list.get(i).id+",");
@@ -130,6 +129,10 @@ public static class Csv
             writer.append(list.get(i).isArray+",");
             writer.append(list.get(i).isInited+",");
             writer.append(list.get(i).arrSize+"\n");
+
+            writer.append(list.get(i).i+"\n");
+            writer.append(list.get(i).b+"\n");
+
         }
         writer.flush();
         writer.close();
@@ -270,13 +273,22 @@ inited_field_decl returns [Symbol symbol]
     $symbol = new Symbol();
     $symbol.tabid = Symtables.stack.peek().id;
     $symbol.name = $Ident.text;
+    $symbol.isInited = true;
     if($Type.text.equals("int")){
         $symbol.type=Types.INT;
         Symbol.multiType=Types.INT;
+        int value = 0;
+        try{value = Integer.parseInt($literal.text);}
+        catch(Exception e){}
+        $symbol.i = value;
         }
     else if($Type.text.equals("boolean")){
         $symbol.type=Types.BOOL;
         Symbol.multiType=Types.BOOL;
+        boolean value = true;
+        try{value = Boolean.parseBoolean($literal.text);}
+        catch(Exception e){}
+        $symbol.b = value;
         }
     else{
         $symbol.type=Types.INVALID;

@@ -1,14 +1,12 @@
 
 class Program {
 
+    int a = 10;
+    int b = 22;
+
     int abc()
     {
-        int a;
-        int b;
-        int c;
-        int d;
-        if(a||b||c||d)
-        {}
+
     }
 
 	int main () {
