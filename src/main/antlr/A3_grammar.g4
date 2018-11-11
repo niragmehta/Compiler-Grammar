@@ -9,12 +9,13 @@ import java.util.*;
 
 public enum Types {INT, CHAR, BOOL, STR, VOID, LABEL, INVALID}; //symbol type
 public enum Scope {GLOBAL, LOCAL, CONST, INVALID}; //symbol scope
-public enum Opcode {ADD, SUB, MUL, DIV, NEG, READ, AND, OR, WRITE, ASSIGN, GOTO, LT, GT, LE, GE, EQ, NE, PARAM, CALL, RET, LABEL};
+public enum Opcode {ADD, SUB, MUL, DIV, NEG, READ, WRITE, ASSIGN, GOTO, LT, GT, LE, GE, EQ, NE, PARAM, CALL, RET, LABEL};
 
 public static class Symbol
 {
     public static int idCounter = 0;
     public static Types multiType;
+    public static List<Symbol> list = new ArrayList();
 
     public int id;
     public int tabid;
@@ -25,7 +26,8 @@ public static class Symbol
     public Types type;
     public Scope scope;
 
-    public static List<Symbol> list = new ArrayList();
+    public List<Instructions> truelist;
+    public List<Instructions> falselist;
 
     public Symbol()
     {
@@ -36,11 +38,14 @@ public static class Symbol
         isInited=false;
         arrSize="0";
 
+        truelist = new ArrayList();
+        falselist = new ArrayList();
+
         scope=Scope.LOCAL;
 
     }
 
-    public static void addSymbol(Symbol symbol)
+    public static void add(Symbol symbol)
     {
         list.add(symbol);
     }
@@ -92,6 +97,15 @@ public static class Instructions
 
     Instructions(){
         id=++idCounter;
+    }
+
+    Instructions(int op1, int op2,int res, Opcode opc)
+    {
+        id=++idCounter;
+        this.op1=op1;
+        this.op2=op2;
+        this.res = res;
+        this.opc = opc;
     }
 
     public static boolean arrayRead = true;
@@ -152,6 +166,8 @@ public static class Csv
 
 }
 
+int count = 0;
+
 }
 
 prog returns [Symtables symtable]
@@ -168,7 +184,7 @@ prog returns [Symtables symtable]
 field_decls
 : field_decls field_decl ';'
 | field_decls inited_field_decl ';'
-| 
+|
 ;
 
 field_decl returns [Symbol symbol]
@@ -181,7 +197,7 @@ field_decl returns [Symbol symbol]
     $symbol.scope=Scope.GLOBAL;
     Symtables.stack.peek().add($symbol);
 
-    Symbol.addSymbol($symbol);
+    Symbol.add($symbol);
 }
 | field_decl ',' Ident '[' num ']'
 {
@@ -195,7 +211,7 @@ field_decl returns [Symbol symbol]
     $symbol.arrSize=$num.text;
 
     Symtables.stack.peek().add($symbol);
-    Symbol.addSymbol($symbol);
+    Symbol.add($symbol);
 }
 | Type Ident
 {
@@ -219,7 +235,7 @@ field_decl returns [Symbol symbol]
     $symbol.scope=Scope.GLOBAL;
 
     Symtables.stack.peek().add($symbol);
-    Symbol.addSymbol($symbol);
+    Symbol.add($symbol);
 }
 | Type Ident '[' num ']'
 {
@@ -244,7 +260,7 @@ field_decl returns [Symbol symbol]
     $symbol.arrSize=$num.text;
 
     Symtables.stack.peek().add($symbol);
-    Symbol.addSymbol($symbol);
+    Symbol.add($symbol);
 }
 ;
 
@@ -269,7 +285,7 @@ inited_field_decl returns [Symbol symbol]
     $symbol.scope=Scope.GLOBAL;
 
     Symtables.stack.peek().add($symbol);
-    Symbol.addSymbol($symbol);
+    Symbol.add($symbol);
 }
 ;
 
@@ -291,7 +307,7 @@ method_decl returns [Symbol symbol]
                  symtable.parentId=Symtables.stack.peek().id;
                  Symtables.stack.push(symtable);
 
-                 Symbol.addSymbol($symbol);
+                 Symbol.add($symbol);
                  Symtables.addSymTableToList(symtable);
 
              }
@@ -321,7 +337,7 @@ method_decl returns [Symbol symbol]
      symtable.parentId=Symtables.stack.peek().id;
      Symtables.stack.push(symtable);
 
-     Symbol.addSymbol($symbol);
+     Symbol.add($symbol);
      Symtables.addSymTableToList(symtable);
 
 }
@@ -350,7 +366,7 @@ params returns [Symbol symbol]
 
     $symbol.scope=Scope.LOCAL;
     Symtables.stack.peek().add($symbol);
-    Symbol.addSymbol($symbol);
+    Symbol.add($symbol);
 
 }
 |
@@ -365,7 +381,7 @@ nextParams returns [Symbol symbol]
     $symbol.type=Symbol.multiType;
     $symbol.scope=Scope.LOCAL;
     Symtables.stack.peek().add($symbol);
-    Symbol.addSymbol($symbol);
+    Symbol.add($symbol);
 
 }
 |
@@ -380,11 +396,6 @@ block returns [Symtables symtable]
  var_decl statements '}'
  { Symtables.stack.pop(); }
 ;
-
-//var_decls
-//: var_decls var_decl
-//|
-//;
 
 var_decl returns [Symbol symbol]
 : Type Ident var_decl_extra ';' var_decl
@@ -407,8 +418,7 @@ var_decl returns [Symbol symbol]
         }
 
     Symtables.stack.peek().add($symbol);
-    Symbol.addSymbol($symbol);
-
+    Symbol.add($symbol);
 }
 |
 ;
@@ -422,7 +432,7 @@ var_decl_extra returns [Symbol symbol]
     $symbol.type = Symbol.multiType;
 
     Symtables.stack.peek().add($symbol);
-    Symbol.addSymbol($symbol);
+    Symbol.add($symbol);
 }
 |
 ;
@@ -461,8 +471,8 @@ location eqOp expr ';'
 }
 | If '(' expr ')' block
 | If '(' expr ')' block Else block
-| While '(' expr ')' statement 
-| Switch expr '{' cases '}' 
+| While '(' expr ')' statement
+| Switch expr '{' cases '}'
 | Ret expr ';'
 | Ret '(' expr ')' ';'
 | Brk ';'
@@ -516,7 +526,7 @@ expr returns [Symbol symbol]
 
    Instructions.list.add(instruction);
    Symtables.stack.peek().add($symbol);
-   Symbol.addSymbol($symbol);
+   Symbol.add($symbol);
 }
 | '!' expr
 {
@@ -531,7 +541,7 @@ expr returns [Symbol symbol]
 
    Instructions.list.add(instruction);
    Symtables.stack.peek().add($symbol);
-   Symbol.addSymbol($symbol);
+   Symbol.add($symbol);
 }
 | e1=expr AddOp e2=expr
 {
@@ -546,7 +556,7 @@ expr returns [Symbol symbol]
 
    Instructions.list.add(instruction);
    Symtables.stack.peek().add($symbol);
-   Symbol.addSymbol($symbol);
+   Symbol.add($symbol);
 }
 | e1=expr MulDiv e2=expr
 {
@@ -565,7 +575,7 @@ expr returns [Symbol symbol]
 
    Instructions.list.add(instruction);
    Symtables.stack.peek().add($symbol);
-   Symbol.addSymbol($symbol);
+   Symbol.add($symbol);
 
 }
 | e1=expr SubOp e2=expr
@@ -581,45 +591,67 @@ expr returns [Symbol symbol]
 
    Instructions.list.add(instruction);
    Symtables.stack.peek().add($symbol);
-   Symbol.addSymbol($symbol);
+   Symbol.add($symbol);
 }
 | e1=expr RelOp e2=expr
 {
    $symbol = new Symbol();
    $symbol.tabid = Symtables.stack.peek().id;
-   Instructions instruction = new Instructions();
 
-   instruction.res = $symbol.id;
-   instruction.op1 = $e1.symbol.id;
-   instruction.op2 = $e2.symbol.id;
+   Instructions instruction1 = new Instructions();
+   Instructions instruction2 = new Instructions();
 
-   if($MulDiv.text.equals("<="))
-        instruction.opc = Opcode.LE;
-   if($MulDiv.text.equals(">="))
-        instruction.opc = Opcode.GE;
-    if($MulDiv.text.equals("<"))
-        instruction.opc = Opcode.LT;
-    if($MulDiv.text.equals(">"))
-        instruction.opc = Opcode.GT;
+   if($RelOp.text.equals("<=")){
+        instruction1 = new Instructions($e1.symbol.id,$e2.symbol.id,-1,Opcode.LE);
+        instruction2 = new Instructions($e1.symbol.id,$e2.symbol.id,-1,Opcode.GT);}
+   if($RelOp.text.equals(">=")){
+       instruction1 = new Instructions($e1.symbol.id,$e2.symbol.id,-1,Opcode.GE);
+       instruction2 = new Instructions($e1.symbol.id,$e2.symbol.id,-1,Opcode.LT);}
+    if($RelOp.text.equals("<")){
+        instruction1 = new Instructions($e1.symbol.id,$e2.symbol.id,-1,Opcode.LT);
+        instruction2 = new Instructions($e1.symbol.id,$e2.symbol.id,-1,Opcode.GE);}
+    if($RelOp.text.equals(">")){
+           instruction1 = new Instructions($e1.symbol.id,$e2.symbol.id,-1,Opcode.GT);
+           instruction2 = new Instructions($e1.symbol.id,$e2.symbol.id,-1,Opcode.LE);}
 
-   Instructions.list.add(instruction);
+   $symbol.truelist.add(instruction1);
+   $symbol.falselist.add(instruction2);
+
+   Instructions.list.add(instruction1);
+   Instructions.list.add(instruction2);
+
    Symtables.stack.peek().add($symbol);
-   Symbol.addSymbol($symbol);
+   Symbol.add($symbol);
 }
 | e1=expr AndOp m e2=expr
 {
    $symbol = new Symbol();
    $symbol.tabid = Symtables.stack.peek().id;
-   Instructions instruction = new Instructions();
 
-   instruction.res = $symbol.id;
-   instruction.op1 = $e1.symbol.id;
-   instruction.op2 = $e2.symbol.id;
-   instruction.opc = Opcode.AND;
+   //back patch
+   if($e1.symbol.truelist.isEmpty())
+   {
+      Instructions  instruction = new Instructions($e1.symbol.id,-1,-1,Opcode.GOTO);
+      Instructions.list.add(instruction);
+      $e1.symbol.truelist.add(instruction);
+   }
+   for(int i=0 ; i < $e1.symbol.truelist.size();i++)
+   {
+        if($e1.symbol.truelist.get(i).res == -1)
+            {$e1.symbol.truelist.get(i).res = $m.symbol.id;}
+   }
+   $symbol.truelist = $e2.symbol.truelist;
 
-   Instructions.list.add(instruction);
+
+   //merge lists
+   for(int i = 0;i<$e1.symbol.falselist.size();i++)
+   {$symbol.falselist.add($e1.symbol.falselist.get(i));}
+
+   for(int i = 0;i<$e2.symbol.falselist.size();i++)
+   {$symbol.falselist.add($e2.symbol.falselist.get(i));}
+
    Symtables.stack.peek().add($symbol);
-   Symbol.addSymbol($symbol);
+   Symbol.add($symbol);
 
 }
 | e1=expr OrOp m e2=expr
@@ -627,16 +659,31 @@ expr returns [Symbol symbol]
 
    $symbol = new Symbol();
    $symbol.tabid = Symtables.stack.peek().id;
-   Instructions instruction = new Instructions();
 
-   instruction.res = $symbol.id;
-   instruction.op1 = $e1.symbol.id;
-   instruction.op2 = $e2.symbol.id;
-   instruction.opc = Opcode.OR;
+  //back patch
+  if($e1.symbol.falselist.isEmpty())
+  {
+       Instructions instruction = new Instructions($e1.symbol.id,-1,-1,Opcode.GOTO);
+       Instructions.list.add(instruction);
+       $e1.symbol.falselist.add(instruction);
+  }
+  for(int i=0 ; i < $e1.symbol.falselist.size();i++)
+  {
+       if($e1.symbol.falselist.get(i).res == -1)
+           {$e1.symbol.falselist.get(i).res = $m.symbol.id;}
+  }
 
-   Instructions.list.add(instruction);
+  $symbol.falselist = $e2.symbol.falselist;
+
+  //merge lists
+  for(int i = 0;i < $e1.symbol.truelist.size();i++)
+  {$symbol.truelist.add($e1.symbol.truelist.get(i));}
+
+  for(int i = 0;i < $e2.symbol.truelist.size();i++)
+  {$symbol.truelist.add($e2.symbol.truelist.get(i));}
+
    Symtables.stack.peek().add($symbol);
-   Symbol.addSymbol($symbol);
+   Symbol.add($symbol);
 
 }
 | methodCall
@@ -716,7 +763,7 @@ location returns [Symbol symbol]
 
         $symbol = symbolTemp;
         Symtables.stack.peek().add($symbol);
-        Symbol.addSymbol($symbol);
+        Symbol.add($symbol);
     }
 
     Instructions.list.add(instruction);
@@ -729,9 +776,9 @@ m returns [Symbol symbol]:
 {
     $symbol = new Symbol();
     $symbol.type = Types.LABEL;
+    $symbol.name = "L"+ (++count);
     Symtables.stack.peek().add($symbol);
-    Symbol.addSymbol($symbol);
-
+    Symbol.add($symbol);
 
 }
 ;
