@@ -53,6 +53,14 @@ public static class Symbol
         list.add(symbol);
     }
 
+    public static void backpatch(List<Instructions> list, int id)
+    {
+        for(int i=0;i<list.size();i++)
+        {if(list.get(i).res == -1)
+            list.get(i).res = id;
+        }
+    }
+
 }
 
 public static class Symtables
@@ -128,9 +136,9 @@ public static class Csv
             writer.append(list.get(i).scope+",");
             writer.append(list.get(i).isArray+",");
             writer.append(list.get(i).isInited+",");
-            writer.append(list.get(i).arrSize+"\n");
+            writer.append(list.get(i).arrSize+",");
 
-            writer.append(list.get(i).i+"\n");
+            writer.append(list.get(i).i+",");
             writer.append(list.get(i).b+"\n");
 
         }
@@ -311,7 +319,7 @@ method_decl returns [Symbol symbol]
                  $symbol = new Symbol();
                  $symbol.tabid = Symtables.stack.peek().id;
                  $symbol.name = $Ident.text;
-                 $symbol.type=Types.VOID;
+                 $symbol.type=Types.LABEL;
                  $symbol.scope = Scope.GLOBAL;
 
                  Symtables.stack.peek().add($symbol);
@@ -326,6 +334,7 @@ method_decl returns [Symbol symbol]
 '(' params ')' '{' var_decl statements '}'
 {
     Symtables.stack.pop();
+
 }
 | Type Ident
 {
@@ -399,14 +408,20 @@ nextParams returns [Symbol symbol]
 |
 ;
 
-block returns [Symtables symtable]
-: '{' {      Symtables symtable = new Symtables();
+block returns [Symtables symtable, List<Instructions> nextlist]
+: '{' {
+             Symtables symtable = new Symtables();
              symtable.parentId=Symtables.stack.peek().id;
              Symtables.stack.push(symtable);
              Symtables.addSymTableToList(symtable);
       }
- var_decl statements '}'
- { Symtables.stack.pop(); }
+ var_decl statements
+ '}'
+
+ {
+  $nextlist = $statements.nextlist;
+  Symtables.stack.pop();
+  }
 ;
 
 var_decl returns [Symbol symbol]
@@ -449,15 +464,20 @@ var_decl_extra returns [Symbol symbol]
 |
 ;
 
-statements
-: statement statements
-|
+statements returns[List<Instructions> nextlist]
+: statement k statements
+{
+    Symbol.backpatch($statement.nextlist,$k.symbol.id);
+    $nextlist = $statements.nextlist;
+}
+| {$nextlist = new ArrayList();}
 ;
 
-statement returns [Instructions instruction]
+statement returns [Instructions instruction, List<Instructions> nextlist]
 : {Instructions.arrayRead = false;}
 location eqOp expr ';'
 {
+    $nextlist = new ArrayList();
     $instruction = new Instructions();
 
     if($location.symbol.isArray)
@@ -481,16 +501,65 @@ location eqOp expr ';'
     Instructions.list.add($instruction);
 
 }
-| If '(' expr ')' block
-| If '(' expr ')' block Else block
-| While '(' expr ')' statement
+| If '(' expr ')' m block
+{
+   //backpatch
+   Symbol.backpatch($expr.symbol.truelist , $m.symbol.id);
+   //union
+   List<Instructions> mergelist = new ArrayList();
+   mergelist.addAll($expr.symbol.falselist);
+   mergelist.addAll($block.nextlist);
+   $nextlist = mergelist;
+}
+| If '(' expr ')' m1=m b1=block n Else m2=m b2=block
+{
+    Symbol.backpatch($expr.symbol.truelist,$m1.symbol.id);
+    Symbol.backpatch($expr.symbol.falselist,$m2.symbol.id);
+    List<Instructions> list = new ArrayList();
+    list.addAll($b1.nextlist);
+    list.addAll($n.nextlist);
+    list.addAll($b2.nextlist);
+    $nextlist=list;
+}
+| While m1=m '(' expr ')' m2=m s=statement
+{
+    $nextlist = new ArrayList();
+    Symbol.backpatch($expr.symbol.truelist,$m2.symbol.id);
+    Symbol.backpatch($s.nextlist,$m1.symbol.id);
+
+    $nextlist = $expr.symbol.falselist;
+    Instructions instruction = new Instructions(-1,-1,$m1.symbol.id,Opcode.GOTO);
+    Instructions.list.add(instruction);
+}
 | Switch expr '{' cases '}'
-| Ret expr ';'
-| Ret '(' expr ')' ';'
-| Brk ';'
-| Cnt ';'
-| block
+{
+
+}
+{$nextlist = new ArrayList();}
+| Ret expr ';' {Instructions instruction = new Instructions($expr.symbol.id,-1,-1,Opcode.RET);Instructions.list.add(instruction);
+                $nextlist = new ArrayList();}
+| Ret '(' expr ')' ';' {Instructions instruction = new Instructions($expr.symbol.id,-1,-1,Opcode.RET);Instructions.list.add(instruction);
+                       $nextlist = new ArrayList();}
+| Brk ';'{Instructions instruction = new Instructions(-1,-1,-1,Opcode.GOTO);Instructions.list.add(instruction);
+          $nextlist = new ArrayList();}
+| Cnt ';' {Instructions instruction = new Instructions(-1,-1,-1,Opcode.GOTO);Instructions.list.add(instruction);
+           $nextlist = new ArrayList();}
+| block {$nextlist = $block.nextlist;}
 | methodCall ';'
+{
+    $nextlist = new ArrayList();
+
+    Symbol symbol = new Symbol();
+    symbol.name = Integer.toString($methodCall.paramCount);
+    symbol.tabid = Symtables.stack.peek().id;
+
+    Symtables.stack.peek().add(symbol);
+    Symbol.add(symbol);
+
+    Instructions instruction = new Instructions($methodCall.symbol.id,symbol.id,-1,Opcode.CALL);
+    Instructions.list.add(instruction);
+
+}
 ;
 
 cases
@@ -499,30 +568,66 @@ cases
 ;
 
 
-methodCall
+methodCall returns [Symbol symbol, int paramCount]
 : Ident '(' args ')'
+{
+    $paramCount = $args.count;
+    for(int i=0;i<Symbol.list.size();i++)
+    {
+        if(Symbol.list.get(i).name.equals($Ident.text))
+            {$symbol = Symbol.list.get(i); break;}
+    }
+}
 | Callout '(' Str calloutArgs ')'
+{
+    $paramCount = $calloutArgs.count;
+    $symbol = new Symbol();
+    $symbol.name = $Str.text;
+    $symbol.tabid = Symtables.stack.peek().id;
+
+    Symtables.stack.peek().add($symbol);
+    Symbol.add($symbol);
+
+}
 ;
 
-args
-: someArgs
-|
+args returns [int count]
+: someArgs{ $count = $someArgs.count;}
+| {$count = 0;}
 ;
 
-someArgs
-: someArgs ',' expr
-| expr
+someArgs returns [int count]
+: someArgs ',' expr {$count = $count +1;}
+| expr {$count = 1;}
 ;
 
-calloutArgs
+calloutArgs returns [int count, Symbol symbol]
 : calloutArgs ',' expr
+{
+
+    $count = $count + 1;
+    $symbol = $expr.symbol;
+    Instructions instruction = new Instructions($symbol.id,-1,-1,Opcode.PARAM);
+    Instructions.list.add(instruction);
+}
 | calloutArgs ',' Str
-|
+{
+    $count = $count + 1;
+    $symbol = new Symbol();
+    $symbol.name = $Str.text;
+    $symbol.tabid = Symtables.stack.peek().id;
+    Instructions instruction = new Instructions($symbol.id,-1,-1,Opcode.PARAM);
+
+    Symtables.stack.peek().add($symbol);
+    Symbol.add($symbol);
+    Instructions.list.add(instruction);
+}
+| {$count =  0;}
 ;
 
 
 expr returns [Symbol symbol]
-: literal {$symbol = new Symbol(); $symbol.name = $literal.string;}
+: literal {$symbol = $literal.symbol;}
 | location {$symbol = $location.symbol; }
 | '(' expr ')' { $symbol = $expr.symbol; }
 | SubOp expr
@@ -625,6 +730,12 @@ expr returns [Symbol symbol]
     if($RelOp.text.equals(">")){
            instruction1 = new Instructions($e1.symbol.id,$e2.symbol.id,-1,Opcode.GT);
            instruction2 = new Instructions($e1.symbol.id,$e2.symbol.id,-1,Opcode.LE);}
+    if($RelOp.text.equals("==")){
+          instruction1 = new Instructions($e1.symbol.id,$e2.symbol.id,-1,Opcode.EQ);
+          instruction2 = new Instructions($e1.symbol.id,$e2.symbol.id,-1,Opcode.NE);}
+    if($RelOp.text.equals("!=")){
+         instruction1 = new Instructions($e1.symbol.id,$e2.symbol.id,-1,Opcode.NE);
+         instruction2 = new Instructions($e1.symbol.id,$e2.symbol.id,-1,Opcode.EQ);}
 
    $symbol.truelist.add(instruction1);
    $symbol.falselist.add(instruction2);
@@ -647,11 +758,7 @@ expr returns [Symbol symbol]
       Instructions.list.add(instruction);
       $e1.symbol.truelist.add(instruction);
    }
-   for(int i=0 ; i < $e1.symbol.truelist.size();i++)
-   {
-        if($e1.symbol.truelist.get(i).res == -1)
-            {$e1.symbol.truelist.get(i).res = $m.symbol.id;}
-   }
+   Symbol.backpatch($e1.symbol.truelist ,$m.symbol.id );
    $symbol.truelist = $e2.symbol.truelist;
 
 
@@ -791,19 +898,58 @@ m returns [Symbol symbol]:
     $symbol.name = "L"+ (++count);
     Symtables.stack.peek().add($symbol);
     Symbol.add($symbol);
-
 }
 ;
+
+n returns [List<Instructions> nextlist]:
+{
+    $nextlist = new ArrayList();
+    Instructions instruction = new Instructions(-1,-1,-1,Opcode.GOTO);
+    Instructions.list.add(instruction);
+    $nextlist.add(instruction);
+};
+
+k returns [Symbol symbol]:
+{
+    $symbol = new Symbol();
+};
 
 num returns [String string]
 : DecNum {$string = $DecNum.text;}
 | HexNum {$string = $HexNum.text;}
 ;
 
-literal returns[String string]
-: num{$string = $num.string;}
-| Char {$string=$Char.text;}
-| BoolLit {$string=$BoolLit.text;}
+literal returns[String string, Symbol symbol]
+: num{$string = $num.string;
+    $symbol = new Symbol();
+    $symbol.name = $num.string;
+    $symbol.scope = Scope.CONST;
+    $symbol.type=Types.INT;
+    $symbol.tabid = Symtables.stack.peek().id;
+
+    Symtables.stack.peek().add($symbol);
+    Symbol.add($symbol);
+}
+| Char {$string=$Char.text;
+    $symbol = new Symbol();
+    $symbol.name = $Char.text;
+    $symbol.scope = Scope.CONST;
+    $symbol.type=Types.CHAR;
+    $symbol.tabid = Symtables.stack.peek().id;
+
+    Symtables.stack.peek().add($symbol);
+    Symbol.add($symbol);
+}
+| BoolLit {$string=$BoolLit.text;
+    $symbol = new Symbol();
+    $symbol.name = $BoolLit.text;
+    $symbol.scope = Scope.CONST;
+    $symbol.type=Types.BOOL;
+    $symbol.tabid = Symtables.stack.peek().id;
+
+    Symtables.stack.peek().add($symbol);
+    Symbol.add($symbol);
+}
 ;
 
 eqOp

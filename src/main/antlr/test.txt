@@ -4,13 +4,15 @@ class Program {
     int a = 10;
     int b = 22;
 
-    int abc()
-    {
 
+    void abc(int d,int e)
+    {
+        callout("printf", "hello world\n");
     }
 
 	int main () {
-		callout("printf", "hello world\n");
+
+	    abc();
 		return 0;
 	}
 }
