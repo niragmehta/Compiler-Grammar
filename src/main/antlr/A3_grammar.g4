@@ -601,6 +601,7 @@ methodCall returns [Symbol symbol, int paramCount]
     $paramCount = $calloutArgs.count;
     $symbol = new Symbol();
     $symbol.name = $Str.text;
+    $symbol.type = Types.STR;
     $symbol.tabid = Symtables.stack.peek().id;
 
     Symtables.stack.peek().add($symbol);
@@ -633,6 +634,7 @@ calloutArgs returns [int count, Symbol symbol]
     $count = $count + 1;
     $symbol = new Symbol();
     $symbol.name = $Str.text;
+    $symbol.type = Types.STR;
     $symbol.tabid = Symtables.stack.peek().id;
     Instructions instruction = new Instructions($symbol.id,-1,-1,Opcode.PARAM);
 
@@ -721,8 +723,8 @@ expr returns [Symbol symbol]
    }
    else
    {
-       Symbol sym1 = new Symbol(); sym1.name = "T"+ (++symbolCount);
-       Symbol sym2 = new Symbol(); sym2.name = "T"+ (++symbolCount);
+       Symbol sym1 = new Symbol(); sym1.name = "T"+ (++symbolCount); sym1.type = Types.LABEL;
+       Symbol sym2 = new Symbol(); sym2.name = "T"+ (++symbolCount); sym2.type = Types.LABEL;
        Instructions instruction1 = new Instructions($e1.symbol.id,$e2.symbol.id,sym1.id,Opcode.DIV);
        Instructions instruction2 = new Instructions(sym1.id,$e2.symbol.id,sym2.id,Opcode.MUL);
        Instructions instruction3 = new Instructions($e2.symbol.id,sym2.id,$symbol.id,Opcode.SUB);
@@ -734,8 +736,6 @@ expr returns [Symbol symbol]
        Instructions.list.add(instruction2);
        Instructions.list.add(instruction3);
    }
-
-
 
 }
 | e1=expr SubOp e2=expr
