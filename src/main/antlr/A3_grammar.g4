@@ -503,9 +503,7 @@ location eqOp expr ';'
 }
 | If '(' expr ')' m block
 {
-   //backpatch
    Symbol.backpatch($expr.symbol.truelist , $m.symbol.id);
-   //union
    List<Instructions> mergelist = new ArrayList();
    mergelist.addAll($expr.symbol.falselist);
    mergelist.addAll($block.nextlist);
@@ -531,11 +529,18 @@ location eqOp expr ';'
     Instructions instruction = new Instructions(-1,-1,$m1.symbol.id,Opcode.GOTO);
     Instructions.list.add(instruction);
 }
-| Switch expr '{' cases '}'
+| Switch expr m '{' cases '}'
 {
+    $nextlist = new ArrayList();
+    Symbol.backpatch($expr.symbol.truelist,$m.symbol.id);
+
+    List<Instructions> mergedlist = new ArrayList();
+    mergedlist.addAll($expr.symbol.falselist);
+    mergedlist.addAll($cases.nextlist);
+
+    $nextlist = mergedlist;
 
 }
-{$nextlist = new ArrayList();}
 | Ret expr ';' {Instructions instruction = new Instructions($expr.symbol.id,-1,-1,Opcode.RET);Instructions.list.add(instruction);
                 $nextlist = new ArrayList();}
 | Ret '(' expr ')' ';' {Instructions instruction = new Instructions($expr.symbol.id,-1,-1,Opcode.RET);Instructions.list.add(instruction);
@@ -558,13 +563,25 @@ location eqOp expr ';'
 
     Instructions instruction = new Instructions($methodCall.symbol.id,symbol.id,-1,Opcode.CALL);
     Instructions.list.add(instruction);
-
 }
 ;
 
-cases
-: Case literal ':' statements cases
+cases returns [List<Instructions> nextlist]
+: Case literal ':' statements m cases
+{
+    Symbol.backpatch($statements.nextlist,$m.symbol.id);
+
+    List<Instructions> mergedlist =new ArrayList();
+    mergedlist.addAll($statements.nextlist);
+    mergedlist.addAll($cases.nextlist);
+
+    $nextlist = mergedlist;
+
+}
 | Case literal ':' statements
+{
+    $nextlist = $statements.nextlist;
+}
 ;
 
 
