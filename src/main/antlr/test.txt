@@ -8,7 +8,7 @@ class Program {
 
     void abc()
     {
-        d = a + b + c;
+        d = a % b;
     }
 
 	int main () {

@@ -705,20 +705,37 @@ expr returns [Symbol symbol]
    $symbol.name = "T"+ (++symbolCount);
    $symbol.type = Types.LABEL;
    $symbol.tabid = Symtables.stack.peek().id;
-   Instructions instruction = new Instructions();
-
-   instruction.res = $symbol.id;
-   instruction.op1 = $e1.symbol.id;
-   instruction.op2 = $e2.symbol.id;
 
    if($MulDiv.text.equals("*"))
-    instruction.opc = Opcode.MUL;
+   {
+      Instructions instruction = new Instructions($e1.symbol.id,$e2.symbol.id,$symbol.id,Opcode.MUL);
+      Instructions.list.add(instruction);
+      Symtables.stack.peek().add($symbol);
+      Symbol.add($symbol);
+   }
+   else if($MulDiv.text.equals("/")){
+      Instructions instruction = new Instructions($e1.symbol.id,$e2.symbol.id,$symbol.id,Opcode.DIV);
+      Instructions.list.add(instruction);
+      Symtables.stack.peek().add($symbol);
+      Symbol.add($symbol);
+   }
    else
-    instruction.opc = Opcode.DIV;
+   {
+       Symbol sym1 = new Symbol(); sym1.name = "T"+ (++symbolCount);
+       Symbol sym2 = new Symbol(); sym2.name = "T"+ (++symbolCount);
+       Instructions instruction1 = new Instructions($e1.symbol.id,$e2.symbol.id,sym1.id,Opcode.DIV);
+       Instructions instruction2 = new Instructions(sym1.id,$e2.symbol.id,sym2.id,Opcode.MUL);
+       Instructions instruction3 = new Instructions($e2.symbol.id,sym2.id,$symbol.id,Opcode.SUB);
 
-   Instructions.list.add(instruction);
-   Symtables.stack.peek().add($symbol);
-   Symbol.add($symbol);
+       Symbol.add(sym1);
+       Symbol.add(sym2);
+       Symbol.add($symbol);
+       Instructions.list.add(instruction1);
+       Instructions.list.add(instruction2);
+       Instructions.list.add(instruction3);
+   }
+
+
 
 }
 | e1=expr SubOp e2=expr
