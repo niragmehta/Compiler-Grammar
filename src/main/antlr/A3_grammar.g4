@@ -178,6 +178,7 @@ public static class Csv
 }
 
 int count = 0;
+int symbolCount = 0;
 
 }
 
@@ -650,6 +651,8 @@ expr returns [Symbol symbol]
 | SubOp expr
 {
    $symbol = new Symbol();
+   $symbol.name = "T"+ (++symbolCount);
+   $symbol.type = Types.LABEL;
    $symbol.tabid = Symtables.stack.peek().id;
    Instructions instruction = new Instructions();
 
@@ -665,6 +668,8 @@ expr returns [Symbol symbol]
 | '!' expr
 {
    $symbol = new Symbol();
+   $symbol.name = "T"+ (++symbolCount);
+   $symbol.type = Types.LABEL;
    $symbol.tabid = Symtables.stack.peek().id;
    Instructions instruction = new Instructions();
 
@@ -680,6 +685,8 @@ expr returns [Symbol symbol]
 | e1=expr AddOp e2=expr
 {
    $symbol = new Symbol();
+   $symbol.name = "T"+ (++symbolCount);
+   $symbol.type = Types.LABEL;
    $symbol.tabid = Symtables.stack.peek().id;
    Instructions instruction = new Instructions();
 
@@ -695,6 +702,8 @@ expr returns [Symbol symbol]
 | e1=expr MulDiv e2=expr
 {
    $symbol = new Symbol();
+   $symbol.name = "T"+ (++symbolCount);
+   $symbol.type = Types.LABEL;
    $symbol.tabid = Symtables.stack.peek().id;
    Instructions instruction = new Instructions();
 
@@ -715,6 +724,8 @@ expr returns [Symbol symbol]
 | e1=expr SubOp e2=expr
 {
    $symbol = new Symbol();
+   $symbol.name = "T"+ (++symbolCount);
+   $symbol.type = Types.LABEL;
    $symbol.tabid = Symtables.stack.peek().id;
    Instructions instruction = new Instructions();
 
@@ -730,6 +741,8 @@ expr returns [Symbol symbol]
 | e1=expr RelOp e2=expr
 {
    $symbol = new Symbol();
+   $symbol.name = "T"+ (++symbolCount);
+   $symbol.type = Types.LABEL;
    $symbol.tabid = Symtables.stack.peek().id;
 
    Instructions instruction1 = new Instructions();
@@ -766,6 +779,8 @@ expr returns [Symbol symbol]
 | e1=expr AndOp m e2=expr
 {
    $symbol = new Symbol();
+   $symbol.name = "T"+ (++symbolCount);
+   $symbol.type = Types.LABEL;
    $symbol.tabid = Symtables.stack.peek().id;
 
    //back patch
@@ -794,6 +809,8 @@ expr returns [Symbol symbol]
 {
 
    $symbol = new Symbol();
+   $symbol.name = "T"+ (++symbolCount);
+   $symbol.type = Types.LABEL;
    $symbol.tabid = Symtables.stack.peek().id;
 
   //back patch

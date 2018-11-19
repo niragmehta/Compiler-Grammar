@@ -3,11 +3,12 @@ class Program {
 
     int a = 10;
     int b = 22;
+    int c = 66;
+    int d;
 
-
-    void abc(int d,int e)
+    void abc()
     {
-        callout("printf", "hello world\n");
+        d = a + b + c;
     }
 
 	int main () {
