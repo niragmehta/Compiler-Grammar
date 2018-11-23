@@ -126,7 +126,7 @@ public static class Csv
     {
         FileWriter writer = new FileWriter("symbols.csv");
         List<Symbol> list = Symbol.list;
-        writer.append("id"+","+"tabid"+","+"name"+","+"type"+","+"scope"+","+"isArray"+","+"isInited"+","+"arrSize"+","+"int val"+","+"bool val\n");
+        writer.append("id"+","+"tabid"+","+"name"+","+"type"+","+"scope"+","+"isArray"+"," + "arrSize" + "," + "isInited" + "," + "int_val" + "," + "bool_val" + "\n");
         for(int i=0;i<list.size();i++)
         {
             writer.append(list.get(i).id+",");
@@ -135,8 +135,8 @@ public static class Csv
             writer.append(list.get(i).type+",");
             writer.append(list.get(i).scope+",");
             writer.append(list.get(i).isArray+",");
-            writer.append(list.get(i).isInited+",");
             writer.append(list.get(i).arrSize+",");
+            writer.append(list.get(i).isInited+",");
 
             writer.append(list.get(i).i+",");
             writer.append(list.get(i).b+"\n");
