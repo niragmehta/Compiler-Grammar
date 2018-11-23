@@ -283,6 +283,7 @@ inited_field_decl returns [Symbol symbol]
     $symbol.tabid = Symtables.stack.peek().id;
     $symbol.name = $Ident.text;
     $symbol.isInited = true;
+    $symbol.scope=Scope.GLOBAL;
     if($Type.text.equals("int")){
         $symbol.type=Types.INT;
         Symbol.multiType=Types.INT;
@@ -303,7 +304,9 @@ inited_field_decl returns [Symbol symbol]
         $symbol.type=Types.INVALID;
         Symbol.multiType=Types.INVALID;
         }
-    $symbol.scope=Scope.GLOBAL;
+
+    Instructions instruction = new Instructions($symbol.id,$literal.symbol.id,-1,Opcode.ASSIGN);
+    Instructions.list.add(instruction);
 
     Symtables.stack.peek().add($symbol);
     Symbol.add($symbol);
@@ -317,19 +320,19 @@ method_decls
 
 method_decl returns [Symbol symbol]
 : Void Ident {
-                 $symbol = new Symbol();
-                 $symbol.tabid = Symtables.stack.peek().id;
-                 $symbol.name = $Ident.text;
-                 $symbol.type=Types.LABEL;
-                 $symbol.scope = Scope.GLOBAL;
+     $symbol = new Symbol();
+     $symbol.tabid = Symtables.stack.peek().id;
+     $symbol.name = $Ident.text;
+     $symbol.type=Types.LABEL;
+     $symbol.scope = Scope.GLOBAL;
 
-                 Symtables.stack.peek().add($symbol);
-                 Symtables symtable = new Symtables();
-                 symtable.parentId=Symtables.stack.peek().id;
-                 Symtables.stack.push(symtable);
+     Symtables.stack.peek().add($symbol);
+     Symtables symtable = new Symtables();
+     symtable.parentId=Symtables.stack.peek().id;
+     Symtables.stack.push(symtable);
 
-                 Symbol.add($symbol);
-                 Symtables.addSymTableToList(symtable);
+     Symbol.add($symbol);
+     Symtables.addSymTableToList(symtable);
 
              }
 '(' params ')' '{' var_decl statements '}'
@@ -655,6 +658,7 @@ expr returns [Symbol symbol]
    $symbol = new Symbol();
    $symbol.name = "T"+ (++symbolCount);
    $symbol.type = Types.LABEL;
+   $symbol.scope = Scope.CONST;
    $symbol.tabid = Symtables.stack.peek().id;
    Instructions instruction = new Instructions();
 
@@ -672,6 +676,7 @@ expr returns [Symbol symbol]
    $symbol = new Symbol();
    $symbol.name = "T"+ (++symbolCount);
    $symbol.type = Types.LABEL;
+   $symbol.scope = Scope.CONST;
    $symbol.tabid = Symtables.stack.peek().id;
    Instructions instruction = new Instructions();
 
@@ -689,6 +694,7 @@ expr returns [Symbol symbol]
    $symbol = new Symbol();
    $symbol.name = "T"+ (++symbolCount);
    $symbol.type = Types.LABEL;
+   $symbol.scope = Scope.CONST;
    $symbol.tabid = Symtables.stack.peek().id;
    Instructions instruction = new Instructions();
 
@@ -706,6 +712,7 @@ expr returns [Symbol symbol]
    $symbol = new Symbol();
    $symbol.name = "T"+ (++symbolCount);
    $symbol.type = Types.LABEL;
+   $symbol.scope = Scope.CONST;
    $symbol.tabid = Symtables.stack.peek().id;
 
    if($MulDiv.text.equals("*"))
@@ -743,6 +750,7 @@ expr returns [Symbol symbol]
    $symbol = new Symbol();
    $symbol.name = "T"+ (++symbolCount);
    $symbol.type = Types.LABEL;
+   $symbol.scope = Scope.CONST;
    $symbol.tabid = Symtables.stack.peek().id;
    Instructions instruction = new Instructions();
 
@@ -760,6 +768,7 @@ expr returns [Symbol symbol]
    $symbol = new Symbol();
    $symbol.name = "T"+ (++symbolCount);
    $symbol.type = Types.LABEL;
+   $symbol.scope = Scope.CONST;
    $symbol.tabid = Symtables.stack.peek().id;
 
    Instructions instruction1 = new Instructions();
@@ -798,6 +807,7 @@ expr returns [Symbol symbol]
    $symbol = new Symbol();
    $symbol.name = "T"+ (++symbolCount);
    $symbol.type = Types.LABEL;
+   $symbol.scope = Scope.CONST;
    $symbol.tabid = Symtables.stack.peek().id;
 
    //back patch
@@ -828,6 +838,7 @@ expr returns [Symbol symbol]
    $symbol = new Symbol();
    $symbol.name = "T"+ (++symbolCount);
    $symbol.type = Types.LABEL;
+   $symbol.scope = Scope.CONST;
    $symbol.tabid = Symtables.stack.peek().id;
 
   //back patch
