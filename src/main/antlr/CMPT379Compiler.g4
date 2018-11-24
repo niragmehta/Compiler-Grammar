@@ -465,16 +465,24 @@ var_decl_extra returns [Symbol symbol]
 |
 ;
 
-statements returns[List<Instructions> nextlist]
+statements returns[List<Instructions> nextlist, List<Instructions> breaklist, List<Instructions> continuelist]
 : statement k statements
 {
     Symbol.backpatch($statement.nextlist,$k.symbol.id);
     $nextlist = $statements.nextlist;
+
+    $breaklist = new ArrayList();
+    $continuelist = new ArrayList();
 }
-| {$nextlist = new ArrayList();}
+|
+{
+    $nextlist = new ArrayList();
+    $breaklist = new ArrayList();
+    $continuelist = new ArrayList();
+}
 ;
 
-statement returns [Instructions instruction, List<Instructions> nextlist]
+statement returns [Instructions instruction, List<Instructions> nextlist , List<Instructions> breaklist, List<Instructions> continuelist]
 : {Instructions.arrayRead = false;}
 location eqOp expr ';'
 {
@@ -501,6 +509,9 @@ location eqOp expr ';'
 
     Instructions.list.add($instruction);
 
+    $breaklist = new ArrayList();
+    $continuelist = new ArrayList();
+
 }
 | If '(' expr ')' m block
 {
@@ -509,6 +520,9 @@ location eqOp expr ';'
    mergelist.addAll($expr.symbol.falselist);
    mergelist.addAll($block.nextlist);
    $nextlist = mergelist;
+
+   $breaklist = new ArrayList();
+   $continuelist = new ArrayList();
 }
 | If '(' expr ')' m1=m b1=block n Else m2=m b2=block
 {
@@ -519,6 +533,9 @@ location eqOp expr ';'
     list.addAll($n.nextlist);
     list.addAll($b2.nextlist);
     $nextlist=list;
+
+    $breaklist = new ArrayList();
+    $continuelist = new ArrayList();
 }
 | While m1=m '(' expr ')' m2=m s=statement
 {
@@ -529,6 +546,9 @@ location eqOp expr ';'
     $nextlist = $expr.symbol.falselist;
     Instructions instruction = new Instructions(-1,-1,$m1.symbol.id,Opcode.GOTO);
     Instructions.list.add(instruction);
+
+    $breaklist = new ArrayList();
+    $continuelist = new ArrayList();
 }
 | Switch expr m '{' cases '}'
 {
@@ -538,19 +558,43 @@ location eqOp expr ';'
     List<Instructions> mergedlist = new ArrayList();
     mergedlist.addAll($expr.symbol.falselist);
     mergedlist.addAll($cases.nextlist);
-
     $nextlist = mergedlist;
+
+    $breaklist = $cases.breaklist;
+    $continuelist = $cases.continuelist;
 
 }
 | Ret expr ';' {Instructions instruction = new Instructions($expr.symbol.id,-1,-1,Opcode.RET);Instructions.list.add(instruction);
-                $nextlist = new ArrayList();}
+                $nextlist = new ArrayList();
+                $breaklist = new ArrayList();
+                $continuelist = new ArrayList();
+                }
 | Ret '(' expr ')' ';' {Instructions instruction = new Instructions($expr.symbol.id,-1,-1,Opcode.RET);Instructions.list.add(instruction);
-                       $nextlist = new ArrayList();}
-| Brk ';'{Instructions instruction = new Instructions(-1,-1,-1,Opcode.GOTO);Instructions.list.add(instruction);
-          $nextlist = new ArrayList();}
+                       $nextlist = new ArrayList();
+                       $breaklist = new ArrayList();
+                       $continuelist = new ArrayList();
+                       }
+| Brk ';'
+{       Instructions instruction = new Instructions(-1,-1,-1,Opcode.GOTO);Instructions.list.add(instruction);
+        $nextlist = new ArrayList();
+        $breaklist = new ArrayList();
+        $breaklist.add(instruction);
+
+        $continuelist = new ArrayList();
+          }
 | Cnt ';' {Instructions instruction = new Instructions(-1,-1,-1,Opcode.GOTO);Instructions.list.add(instruction);
-           $nextlist = new ArrayList();}
-| block {$nextlist = $block.nextlist;}
+           $nextlist = new ArrayList();
+
+           $continuelist = new ArrayList();
+           $continuelist.add(instruction);
+           $breaklist = new ArrayList();
+           }
+| block
+ {
+$nextlist = $block.nextlist;
+    $breaklist = new ArrayList();
+    $continuelist = new ArrayList();
+}
 | methodCall ';'
 {
     $nextlist = new ArrayList();
@@ -564,10 +608,13 @@ location eqOp expr ';'
 
     Instructions instruction = new Instructions($methodCall.symbol.id,symbol.id,-1,Opcode.CALL);
     Instructions.list.add(instruction);
+
+        $breaklist = new ArrayList();
+        $continuelist = new ArrayList();
 }
 ;
 
-cases returns [List<Instructions> nextlist]
+cases returns [List<Instructions> nextlist, , List<Instructions> breaklist, List<Instructions> continuelist]
 : Case literal ':' statements m cases
 {
     Symbol.backpatch($statements.nextlist,$m.symbol.id);
@@ -575,13 +622,25 @@ cases returns [List<Instructions> nextlist]
     List<Instructions> mergedlist =new ArrayList();
     mergedlist.addAll($statements.nextlist);
     mergedlist.addAll($cases.nextlist);
-
     $nextlist = mergedlist;
 
+    List<Instructions> bl = new ArrayList();
+    List<Instructions> cl = new ArrayList();
+
+    bl.addAll($statements.breaklist);
+    bl.addAll($cases.breaklist);
+
+    cl.addAll($statements.breaklist);
+    cl.addAll($cases.breaklist);
+
+    $breaklist = bl;
+    $continuelist = cl;
 }
 | Case literal ':' statements
 {
     $nextlist = $statements.nextlist;
+    $breaklist = $statements.breaklist;
+    $continuelist = $statements.continuelist;
 }
 ;
 
