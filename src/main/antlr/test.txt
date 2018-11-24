@@ -3,15 +3,20 @@ class Program {
 
     int a = 10;
     int b = 22;
-    int c = 66;
+    int c[10];
     int d;
 
     void abc()
     {
+
+        int f;
+        int e;
+
         d = a % b;
     }
 
-	int main () {
+	int main() {
+
 
 	    abc();
 		return 0;

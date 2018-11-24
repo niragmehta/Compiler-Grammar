@@ -1,4 +1,4 @@
-grammar A3_grammar;
+grammar CMPT379Compiler;
 
 @header {
 import java.io.*;
@@ -353,11 +353,8 @@ method_decl returns [Symbol symbol]
      else if($Type.text.equals("boolean")){
         $symbol.type=Types.BOOL;
         }
-     else{
-        $symbol.type=Types.INVALID;
-        }
-     Symtables.stack.peek().add($symbol);
 
+     Symtables.stack.peek().add($symbol);
      Symtables symtable = new Symtables();
      symtable.parentId=Symtables.stack.peek().id;
      Symtables.stack.push(symtable);
