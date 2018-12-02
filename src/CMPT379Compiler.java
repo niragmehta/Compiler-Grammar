@@ -131,7 +131,9 @@ public class CMPT379Compiler
             if(symbols.get(i).tabid == tabid && (symbols.get(i).scope.equals("LOCAL") || symbols.get(i).scope.equals("CONST")) &&  (symbols.get(i).type.equals("INT") || symbols.get(i).type.equals("BOOL") ) )
             {
                 locals.put(symbols.get(i).id,symbols.get(i));
-                offsetValue+=16;
+
+                if(symbols.get(i).scope.equals("CONST"))
+                    offsetValue+=16;
                 offset.put(symbols.get(i),offsetValue);
                 //System.out.println(symbols.get(i).name);
             }
@@ -165,59 +167,71 @@ public class CMPT379Compiler
         {
 
             Symbol op1= new Symbol(), op2 = new Symbol(), res = new Symbol();
+            //a=1 for normal local vars, a=2 for literal values like $7, a=3 for global vars like $a
             int a = 0,b = 0, c = 0;
             if(localInstructions.get(i).op1!=-1) {
                 if (locals.get(localInstructions.get(i).op1) != null) {
                     op1 = locals.get(localInstructions.get(i).op1);
                     a=1;
+                    if(locals.get(localInstructions.get(i).op1).scope.equals("CONST"))
+                        a=2;
                 }
                 else if(globalVars.get(localInstructions.get(i).op1) != null) {
                     op1 = globalVars.get(localInstructions.get(i).op1);
-                    a=2;
+                    a=3;
                 }
             }
             if(localInstructions.get(i).op2!=-1) {
                 if (locals.get(localInstructions.get(i).op2) != null) {
                     op2 = locals.get(localInstructions.get(i).op2);
                     b=1;
+                    if(locals.get(localInstructions.get(i).op2).scope.equals("CONST"))
+                        b=2;
                 }
                 else if(globalVars.get(localInstructions.get(i).op2) != null) {
                     op2 = globalVars.get(localInstructions.get(i).op2);
-                    b=2;
+                    b=3;
                 }
             }
             if(localInstructions.get(i).res!=-1) {
                 if (locals.get(localInstructions.get(i).res) != null) {
                     res = locals.get(localInstructions.get(i).res);
                     c=1;
+                    if(locals.get(localInstructions.get(i).res).scope.equals("CONST"))
+                        c=2;
                 }
                 else if(globalVars.get(localInstructions.get(i).res) != null) {
                     res = globalVars.get(localInstructions.get(i).res);
-                    c=2;
+                    c=3;
                 }
             }
 
-            if(localInstructions.get(i).opc.equals("ADD") || localInstructions.get(i).opc.equals("SUB"))
+            if(localInstructions.get(i).opc.equals("ADD") || localInstructions.get(i).opc.equals("SUB") ||
+                    localInstructions.get(i).opc.equals("MUL") || localInstructions.get(i).opc.equals("DIV") )
             {
 
-                if(a==1 )
+                if(a==1)
                     System.out.println("mov -" + offset.get(op1) + "(%rbp), %rax");
-                else if(a==2)
+                else if(a==2 || a==3)
                     System.out.println("$"+op1.name + ", %rax");
                 if(b==1)
                     System.out.println("mov -"+ offset.get(op2) + "(%rbp), %rbx");
-                else if(b==2)
+                else if(b==2 || b==3)
                     System.out.println("$"+op2.name + ", %rbx");
 
                 if(localInstructions.get(i).opc.equals("ADD"))
                     System.out.println("add %rbx, %rax");
-                else
+                else if(localInstructions.get(i).opc.equals("SUB"))
                     System.out.println("sub %rbx, %rax");
+                else if(localInstructions.get(i).opc.equals("MUL"))
+                    System.out.println("mul %rbx, %rax");
+                else if(localInstructions.get(i).opc.equals("DIV"))
+                    System.out.println("div %rbx, %rax");
 
                 if(c==1){
                     System.out.println("mov %rax, -"+offset.get(res)+"(%rbp)");
                 }
-                else if(c==2){
+                else if(c==2 || c==3){
                     System.out.println("mov %rax, $" + res.name);
                 }
             }
@@ -225,12 +239,12 @@ public class CMPT379Compiler
             {
                 if(a==1 && c==1)
                     System.out.println("mov -" + offset.get(op1) + "(%rbp) "+ offset.get(res) +"(%rbp)");
-                else if(a==1 && c==2)
-                    System.out.println("mov -" + offset.get(op1) + "(%rbp) $"+res.name);
-                else if(a==2 && c==1)
-                    System.out.println("mov $"+res.name + " (%rbp)"+offset.get(res));
-                else if(a==2 && c==2)
-                    System.out.println("mov $"+res.name + " $" + res.name);
+                else if(a==1 && (c==2 ||c==3))
+                    System.out.println("mov -" + offset.get(op1) + "(%rbp), $"+res.name);
+                else if((a==2||a==3) && c==1)
+                    System.out.println("mov $"+op1.name + ", (%rbp)"+offset.get(res));
+                else if((a==2||a==3) && (c==2||c==3))
+                    System.out.println("mov $"+op1.name + ", $" + res.name);
             }
 
         }

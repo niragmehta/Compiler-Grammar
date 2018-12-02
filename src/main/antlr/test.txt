@@ -10,7 +10,7 @@ class Program {
 
 	    int x , y , z;
 
-        a = b + c;
+        b = a / 5;
 
 		return 0;
 	}

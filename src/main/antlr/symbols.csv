@@ -7,5 +7,6 @@ id,tabid,name,type,scope,isArray,arrSize,isInited,int_val,bool_val
 6,2,z,INT,LOCAL,false,0,false,0,false
 7,2,y,INT,LOCAL,false,0,false,0,false
 8,2,x,INT,LOCAL,false,0,false,0,false
-9,2,T1,INT,LOCAL,false,0,false,0,false
-11,2,0,INT,CONST,false,0,false,0,false
+9,2,5,INT,CONST,false,0,false,0,false
+10,2,T1,INT,LOCAL,false,0,false,0,false
+12,2,0,INT,CONST,false,0,false,0,false
