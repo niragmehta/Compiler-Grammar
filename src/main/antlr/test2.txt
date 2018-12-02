@@ -1,0 +1,10 @@
+class Program {
+	int value = 100;
+	int main(){
+		if(value >= 100) {
+			value = 200; }
+		else {
+			value = 0; }
+		return value;
+	}
+}

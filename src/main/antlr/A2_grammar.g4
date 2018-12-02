@@ -148,15 +148,15 @@ field_declaration returns [Node node]:
     $node.addEdge($field_declaration.node);
 
 }
-| Type Ident '=' literal SemiColon field_declaration
+| Type Ident ( '=' ) literal SemiColon field_declaration
 {
     $node = new Node("field_declaration");
 
     $node.addEdge(new Node($Type.text));
     $node.addEdge(new Node($Ident.text));
-//    $node.addEdge(new Node("="));
+    $node.addEdge(new Node("="));
     $node.addEdge($literal.node);
-//    $node.addEdge(new Node($SemiColon.text));
+    $node.addEdge(new Node($SemiColon.text));
     $node.addEdge($field_declaration.node);
 }
 | Type Ident multi_declaration SemiColon field_declaration
@@ -295,12 +295,11 @@ var_decl_extra returns [Node node]
 ;
 
 statement returns [Node node]
-: location AssignOp expr SemiColon
+: location ('=' |AssignOp ) expr SemiColon
 {
     $node = new Node("statement");
     $node.addEdge($location.node);
-    $node.addEdge(new Node($AssignOp.text));
-    $node.addEdge($expr.node);
+
 }
 | method_call SemiColon
 {
@@ -691,8 +690,7 @@ Relop
 ;
 
 AssignOp
-: '='
-| '+='
+: '+='
 | '-='
 ;
 

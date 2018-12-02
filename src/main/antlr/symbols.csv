@@ -1,0 +1,11 @@
+id,tabid,name,type,scope,isArray,arrSize,isInited,int_val,bool_val
+1,1,a,INT,GLOBAL,false,0,false,0,false
+2,1,b,INT,GLOBAL,false,0,false,0,false
+3,1,c,INT,GLOBAL,false,0,false,0,false
+4,1,d,INT,GLOBAL,true,7,false,0,false
+5,1,main,LABEL,GLOBAL,false,0,false,0,false
+6,2,z,INT,LOCAL,false,0,false,0,false
+7,2,y,INT,LOCAL,false,0,false,0,false
+8,2,x,INT,LOCAL,false,0,false,0,false
+9,2,T1,INT,LOCAL,false,0,false,0,false
+11,2,0,INT,CONST,false,0,false,0,false
