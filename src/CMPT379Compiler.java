@@ -32,6 +32,7 @@ public class CMPT379Compiler
         scan();
         printBeginning();
         printGlobals();
+        scanMain();
 
     }
 
@@ -70,17 +71,14 @@ public class CMPT379Compiler
                 System.out.println();
 
             }
-            //non initialized variable eg: int a;
-            else if(symbol.scope.equals("GLOBAL")){
+            //non initialized variable eg: int a; also prevent from printing function definition
+            else if(symbol.scope.equals("GLOBAL") && !symbol.type.equals("LABEL")){
                 globalVars.put(symbol.id,symbol);
-                System.out.println(symbol.name + ": .quad");
+                System.out.println(symbol.name + ":\t.quad");
             }
         }
 
         System.out.println("\t.text");
-
-
-        scanMain();
 
     }
 
@@ -97,8 +95,8 @@ public class CMPT379Compiler
     public static void scanMain()
     {
 
+        System.out.println("main:");
         int index = findMainPosition();
-        System.out.println("main.");
 
         //assume there is atleast 1 symbol within main
         int mainTabId = symbols.get(index+1).tabid;
@@ -112,13 +110,12 @@ public class CMPT379Compiler
 
         System.out.println("push %rbp");
         System.out.println("mov %rsp, %rbp");
-        System.out.println("sub %rsp, $" + (locals.size())*16);
+        System.out.println("sub $" + (locals.size())*16 + ", %rsp");
 
         //execute instructions
         executeInstructions(localInstructions,locals,offset);
 
-        System.out.println("add %rsp, $"+ (locals.size())*16);
-        System.out.println("pop %rbp");
+
 
     }
 
@@ -126,16 +123,15 @@ public class CMPT379Compiler
     public static HashMap<Integer,Symbol> findLocals(int index, int tabid , HashMap<Symbol,Integer> offset, int offsetValue)
     {
         HashMap<Integer,Symbol> locals = new HashMap<Integer, Symbol>();
-        for(int i = index + 1;i<symbols.size();i++)
+        for(int i = index ;i<symbols.size();i++)
         {
             if(symbols.get(i).tabid == tabid && (symbols.get(i).scope.equals("LOCAL") || symbols.get(i).scope.equals("CONST")) &&  (symbols.get(i).type.equals("INT") || symbols.get(i).type.equals("BOOL") ) )
             {
                 locals.put(symbols.get(i).id,symbols.get(i));
 
-                if(symbols.get(i).scope.equals("CONST"))
+                if(!symbols.get(i).scope.equals("CONST"))
                     offsetValue+=16;
                 offset.put(symbols.get(i),offsetValue);
-                //System.out.println(symbols.get(i).name);
             }
         }
 
@@ -145,20 +141,22 @@ public class CMPT379Compiler
     //to find all local instructions within the function block.
     public static List<Instructions> scanInstructions(HashMap<Integer,Symbol> locals)
     {
-        List<Instructions> LocalInstructions = new ArrayList<Instructions>();
+        List<Instructions> localInstructions = new ArrayList<Instructions>();
 
         //we assume the instructionSymbols like T1, T2.. are LABELS and that both hashmaps were populated correctly
         for(int i=0;i<instructions.size();i++)
         {
             if( locals.get(instructions.get(i).op1)!=null )
-                LocalInstructions.add(instructions.get(i));
+                localInstructions.add(instructions.get(i));
             else if(locals.get(instructions.get(i).op2)!=null)
-                LocalInstructions.add(instructions.get(i));
+                localInstructions.add(instructions.get(i));
             else if(locals.get(instructions.get(i).res)!=null)
-                LocalInstructions.add(instructions.get(i));
+                localInstructions.add(instructions.get(i));
+            else if(instructions.get(i).opc.equals("CALL"))
+                localInstructions.add(instructions.get(i));
 
         }
-        return LocalInstructions;
+        return localInstructions;
     }
 
     public static void executeInstructions(List<Instructions> localInstructions , HashMap<Integer,Symbol> locals, HashMap<Symbol,Integer> offset)
@@ -167,7 +165,7 @@ public class CMPT379Compiler
         {
 
             Symbol op1= new Symbol(), op2 = new Symbol(), res = new Symbol();
-            //a=1 for normal local vars, a=2 for literal values like $7, a=3 for global vars like $a
+            //a=1 for local vars, a=2 for literal values like $7, a=3 for global vars like $a
             int a = 0,b = 0, c = 0;
             if(localInstructions.get(i).op1!=-1) {
                 if (locals.get(localInstructions.get(i).op1) != null) {
@@ -213,20 +211,20 @@ public class CMPT379Compiler
                 if(a==1)
                     System.out.println("mov -" + offset.get(op1) + "(%rbp), %rax");
                 else if(a==2 || a==3)
-                    System.out.println("$"+op1.name + ", %rax");
+                    System.out.println("mov $"+op1.name + ", %rax");
                 if(b==1)
                     System.out.println("mov -"+ offset.get(op2) + "(%rbp), %rbx");
                 else if(b==2 || b==3)
-                    System.out.println("$"+op2.name + ", %rbx");
+                    System.out.println("mov $"+op2.name + ", %rbx");
 
                 if(localInstructions.get(i).opc.equals("ADD"))
                     System.out.println("add %rbx, %rax");
                 else if(localInstructions.get(i).opc.equals("SUB"))
                     System.out.println("sub %rbx, %rax");
                 else if(localInstructions.get(i).opc.equals("MUL"))
-                    System.out.println("mul %rbx, %rax");
+                    System.out.println("mulq %rbx");
                 else if(localInstructions.get(i).opc.equals("DIV"))
-                    System.out.println("div %rbx, %rax");
+                    System.out.println("divq %rbx");
 
                 if(c==1){
                     System.out.println("mov %rax, -"+offset.get(res)+"(%rbp)");
@@ -237,17 +235,137 @@ public class CMPT379Compiler
             }
             if(localInstructions.get(i).opc.equals("ASSIGN"))
             {
-                if(a==1 && c==1)
-                    System.out.println("mov -" + offset.get(op1) + "(%rbp) "+ offset.get(res) +"(%rbp)");
-                else if(a==1 && (c==2 ||c==3))
-                    System.out.println("mov -" + offset.get(op1) + "(%rbp), $"+res.name);
-                else if((a==2||a==3) && c==1)
-                    System.out.println("mov $"+op1.name + ", (%rbp)"+offset.get(res));
-                else if((a==2||a==3) && (c==2||c==3))
-                    System.out.println("mov $"+op1.name + ", $" + res.name);
+                if(a==1 && c==1) {
+                    System.out.println("movq -" + offset.get(op1) + "(%rbp), %rax");
+                    System.out.println("movq %rax, -" + offset.get(res) + "(%rbp)");
+                }
+                else if(a==1 && (c==2 ||c==3)) {
+                    System.out.println("movq -" + offset.get(op1) + "(%rbp), %rax");
+                    System.out.println("movq %rax, " + res.name);
+                }
+                else if((a==2||a==3) && c==1) {
+                    System.out.println("movq $" + op1.name + ", %rax");
+                    System.out.println("movq %rax, -" + offset.get(res) + "(%rbp)");
+                }
+                else if((a==2||a==3) && (c==2||c==3)) {
+                    System.out.println("movq $" + op1.name + ", %rax");
+                    System.out.println("movq %rax, " + res.name);
+                }
+            }
+            //we assume op2 is a literal value for array reads
+            if(localInstructions.get(i).opc.equals("READ"))
+            {
+                //we know a/op1 is global (guaranteed)
+                System.out.println("movq $"+op1.name+" , %rcx");
+
+                //b is a literal
+                if(b==2 && c==1)
+                {
+                    System.out.println("movq -"+Integer.parseInt(op2.name)*16+"(%rcx), %rax");
+                    System.out.println("movq %rax, -" + offset.get(res) + "(%rbp)");
+                }
+                if(b==2 && c==3)
+                {
+                    System.out.println("movq -"+Integer.parseInt(op2.name)*16+"(%rcx), " + res.name);
+                }
+            }
+            if(localInstructions.get(i).opc.equals("CALL"))
+            {
+                //we want to remove the call instruction since we won't be calling it again
+                removeCall(localInstructions.get(i).id);
+                scanFunction(localInstructions.get(i).op1);
+
+            }
+            if(localInstructions.get(i).opc.equals("RET"))
+            {
+                if(a==1) {
+                    System.out.println("add $" + (locals.size())*16 + ", %rsp");
+                    System.out.println("pop %rbp");
+
+                    System.out.println("movq -" + offset.get(op1)+"(%rcx) , %rax");
+                    System.out.println("ret");
+                }
+                if(a==2 || a==3)
+                {
+
+                    System.out.println("add $" + (locals.size())*16 + ", %rsp");
+                    System.out.println("movq $"+op1.name+", %rax");
+
+                    System.out.println("pop %rbp");
+                    System.out.println("ret");
+                }
+
             }
 
         }
+
+    }
+
+    public static void removeCall(int id)
+    {
+        int index=0;
+        for(int i=0;i<instructions.size();i++)
+        {
+            if(instructions.get(i).id==id)
+            {index=i;}
+        }
+        instructions.remove(index);
+    }
+
+    public static int findFuncTabId(int id)
+    {
+        int index=0;
+        for(int i=0;i<symbols.size();i++)
+        {
+            if(symbols.get(i).id==id)
+            {
+                ++index;
+                break;
+            }
+            else if(symbols.get(i).scope.equals("GLOBAL") && symbols.get(i).type.equals("LABEL"))
+                ++index;
+        }
+        int tabid = 0;
+        for(int i=0;i<symtables.size();i++)
+        {
+            if(symtables.get(i).parentId>1)
+                continue;
+            if(symtables.get(i).parentId==1 && index>1)
+                --index;
+            else if(symtables.get(i).parentId==1 && index==1)
+            {
+                tabid = symtables.get(i).id;
+                return symtables.get(i).id;
+            }
+
+        }
+        return tabid;
+
+    }
+
+    public static void scanFunction(int index)
+    {
+        //assume there is atleast 1 symbol within func
+        int funcTabId = findFuncTabId(index);
+
+        //starting offset value for all local variables
+        int offsetValue = 0;
+
+        HashMap<Symbol,Integer> offset = new HashMap<Symbol, Integer>();
+        HashMap<Integer,Symbol> locals = findLocals(index, funcTabId, offset , offsetValue);
+        List<Instructions> localInstructions = scanInstructions(locals);
+
+        System.out.println();
+        System.out.println("push %rbp");
+        System.out.println("mov %rsp, %rbp");
+        System.out.println("sub $" + (locals.size())*16 + ", %rsp");
+
+        //execute instructions
+        executeInstructions(localInstructions,locals,offset);
+
+//        System.out.println("add $" + (locals.size())*16 + ", %rsp");
+//        System.out.println("pop %rbp");
+        System.out.println();
 
     }
 
@@ -321,6 +439,7 @@ public class CMPT379Compiler
 
     }
 
+//end of class
 }
 
 

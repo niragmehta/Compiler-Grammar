@@ -1,24 +1,26 @@
-.globl main #exports symbol main
+.globl _main #exports symbol main
 .data #global data section
-a: .quad
-b: .quad
-d: .quad
+a:	.quad
+b:	.quad
+c:	.quad
+d: .quad 0, 0, 0, 0, 0, 0, 0
+	.text
+_main:
 push %rbp
 mov %rsp, %rbp
-sub %rsp, $112
--16(%rbp)
--32(%rbp)
--48(%rbp)
--64(%rbp)
--80(%rbp)
--96(%rbp)
--112(%rbp)
-add %rsp, $112
-pop %rbp
+sub $48, %rsp
+
 push %rbp
 mov %rsp, %rbp
-sub %rsp, $16
--16(%rbp)
-add %rsp, $16
+sub $48, %rsp
+mov -16(%rbp), %rax
+mov $c, %rbx
+add %rbx, %rax
+mov %rax, -48(%rbp)
+movq -48(%rbp), %rax
+movq %rax, -32(%rbp)
+add $48, %rsp
 pop %rbp
-main: .quad
+
+add $48, %rsp
+pop %rbp

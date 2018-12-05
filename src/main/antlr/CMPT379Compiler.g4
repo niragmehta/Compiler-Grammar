@@ -676,7 +676,6 @@ someArgs returns [int count]
 calloutArgs returns [int count, Symbol symbol]
 : calloutArgs ',' expr
 {
-
     $count = $count + 1;
     $symbol = $expr.symbol;
     Instructions instruction = new Instructions($symbol.id,-1,-1,Opcode.PARAM);
@@ -936,6 +935,7 @@ location returns [Symbol symbol]
     }
     if(flag==0)
     {
+        //check global
         Symtables table2 = Symtables.list.get(0);
         for(int i=0;i<table2.symbols.size();i++)
         {
@@ -967,6 +967,7 @@ location returns [Symbol symbol]
     }
     if(flag==0)
     {
+        //check global
         Symtables table2 = Symtables.list.get(0);
         for(int i=0;i<table2.symbols.size();i++)
         {
@@ -982,19 +983,26 @@ location returns [Symbol symbol]
 
     if(Instructions.arrayRead)
     {
+
         Symbol symbolTemp = new Symbol();
+        symbolTemp.name = "T"+ (++symbolCount);
         symbolTemp.tabid = Symtables.stack.peek().id;
+        symbolTemp.type = Types.INT;
+
+
+
         instruction.opc = Opcode.READ;
-        int offset=8;
-        try{offset = Integer.parseInt($expr.symbol.name); offset*=8;}
-        catch(Exception e){}
+//        int offset=8;
+//        try{offset = Integer.parseInt($expr.symbol.name); offset*=8;}
+//        catch(Exception e){}
         instruction.op1 = $symbol.id;
-        instruction.op2 = offset;
+        instruction.op2 = $expr.symbol.id;
         instruction.res = symbolTemp.id;
 
         $symbol = symbolTemp;
-        Symtables.stack.peek().add($symbol);
-        Symbol.add($symbol);
+
+        Symbol.add(symbolTemp);
+
     }
 
     Instructions.list.add(instruction);

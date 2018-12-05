@@ -6,12 +6,22 @@ class Program {
     int c;
     int d[7];
 
-	int main() {
+    int abc()
+    {
+        int a,b;
 
-	    int x , y , z;
+        a = b + c;
 
-        b = a / 5;
+    }
 
-		return 0;
+	int main(int argc, int v) {
+
+		int x;
+
+	    callout("printf","hellloWorld");
+
+
+
+		return x;
 	}
 }
